@@ -1,22 +1,28 @@
-import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Select, {components} from 'react-select';
 import {gameData, group, seasonData} from '../types';
 import Switch from 'react-switch';
 import '../App.css';
 import {Lineup} from '../lineupClass';
 import {Filter, HeaderStyle} from '../styles/header';
+import {FirebaseContext} from './FirebaseProvider';
 
 interface iProps {
-  games: gameData[];
-  years: string[];
   selectedYear: string;
   selectedGame: number;
   selectedStat: string;
   finderActive: boolean;
   selectedGroup: string;
-  changeGroup: Dispatch<SetStateAction<group>>;
+  changeGroup: (group: group)=>void;
   changeYear: (picked: string) => void;
-  changeGame: Dispatch<SetStateAction<number>>;
+  changeGame: (index: number) => void;
   changeStat: Dispatch<SetStateAction<string>>;
   changeShowFinder: Dispatch<SetStateAction<boolean>>;
   changeFinderActive: () => void;
@@ -61,8 +67,9 @@ const statOptions: statChoice[] = [
 const groupOptions: groupChoice[] = [
   {value: 'lineups', label: 'Lineups'},
   {value: 'players', label: 'Players'},
-  {value: 'yearly', label: 'Year to Year'},
 ];
+
+
 
 //custom control compononet for select
 const Control = (props: any) => {
@@ -75,8 +82,6 @@ const Control = (props: any) => {
 };
 
 const Header = ({
-  games,
-  years,
   selectedGroup,
   selectedGame,
   selectedYear,
@@ -91,29 +96,21 @@ const Header = ({
   filter,
   setFilter,
 }: iProps) => {
-  const [gameOptions, setGameOptions] = useState<gameChoice[]>([]);
-  const [yearOptions, setyearOptions] = useState<yearChoice[]>([]);
-  useEffect(() => {
-    const gameOptions: gameChoice[] = [
-      {label: 'Season Total', value: -2},
-      {label: 'ACC Total', value: -1},
-      ...games.map((x) => ({label: x.game.replace(/_/g, ' '), value: x.order})),
-    ];
-    setGameOptions(gameOptions);
-  }, [games]);
-  useEffect(() => {
-    const yearOptions: yearChoice[] = years
-      .map((year) => ({
+  const years = useContext(FirebaseContext).years;
+  const data = useContext(FirebaseContext).store.data[selectedYear]
+  const gameOptions: gameChoice[] = useMemo(
+    () => data.map((x,i)=>({label: x.game, value: i})),
+    [data]
+  );
+
+  const yearOptions: yearChoice[] = useMemo(
+    () =>
+      years.map((year) => ({
         label: year,
         value: year,
-      }))
-      .sort((a, b) => {
-        const yearA = +a.value.slice(0, 4);
-        const yearB = +b.value.slice(0, 4);
-        return yearB - yearA;
-      });
-    setyearOptions(yearOptions);
-  }, [years]);
+      })),
+    [years]
+  );
   return (
     <div style={{paddingBottom: '10px'}}>
       <HeaderStyle>
@@ -165,15 +162,13 @@ const Header = ({
           )}
           {!finderActive && (
             <div className="gameInfo">
-              {selectedGame === -2 ? (
-                <div className="totals">Season Total</div>
-              ) : selectedGame === -1 ? (
-                <div className="totals">ACC Total</div>
+              {selectedGame < 9 ? (
+                <div className="totals">{data[selectedGame].game}</div>
               ) : (
                 <div className="score">
-                  <div>Wake Forest: {games[selectedGame].score.wake}</div>
+                  <div>Wake Forest: {data[selectedGame].score.wake}</div>
                   <div>
-                    {games[selectedGame].game}: {games[selectedGame].score.opp}
+                    {data[selectedGame].game}: {data[selectedGame].score.opp}
                   </div>
                 </div>
               )}
@@ -182,7 +177,7 @@ const Header = ({
 
           <div className="selectContainer">
             <Select<gameChoice>
-              options={gameOptions}
+              options={finderActive ? gameOptions.slice(0,9) : gameOptions}
               value={gameOptions.find((x) => x.value === selectedGame)}
               onChange={(picked) =>
                 picked
@@ -192,7 +187,6 @@ const Header = ({
               className="game select"
               isSearchable={false}
               isClearable={false}
-              isDisabled={finderActive}
               getOptionLabel={(option) => option.label}
               getOptionValue={(option) => option.value.toFixed()}
               styles={{
@@ -272,7 +266,7 @@ const Header = ({
           height={20}
           width={35}
           handleDiameter={18}
-          disabled={selectedGame >= 0}
+          disabled={selectedGame >= 9}
         />
       </Filter>
     </div>

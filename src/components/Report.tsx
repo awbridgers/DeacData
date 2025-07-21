@@ -42,36 +42,36 @@ const PlayerReport = ({data, back}: IProps) => {
     return {};
   };
 
-  useEffect(() => {
-    //get the roster from the list of player data
-    setRoster(
-      data.season.players
-        .sort((a, b) => b.time - a.time)
-        .map((x) => ({
-          label: x.players,
-          value: x.players,
-        }))
-    );
-  }, [data]);
-  useEffect(() => {
-    if (player && data) {
-      let on = new Lineup(player);
-      let off = new Lineup('rest');
-      const dataArray = conPlay ? data.conference.lineups : data.season.lineups
-      for (let unit of dataArray) {
-        if (unit.players.includes(player)) {
-          on.combineLineup(unit);
-        } else {
-          off.combineLineup(unit);
-        }
-      }
-      setOnCourt(on);
-      setOnBench(off);
-    } else {
-      setOnBench(null);
-      setOnCourt(null);
-    }
-  }, [player, data, conPlay]);
+  // useEffect(() => {
+  //   //get the roster from the list of player data
+  //   setRoster(
+  //     data.season.players
+  //       .sort((a, b) => b.time - a.time)
+  //       .map((x) => ({
+  //         label: x.players,
+  //         value: x.players,
+  //       }))
+  //   );
+  // }, [data]);
+  // useEffect(() => {
+  //   if (player && data) {
+  //     let on = new Lineup(player);
+  //     let off = new Lineup('rest');
+  //     const dataArray = conPlay ? data.conference.lineups : data.season.lineups
+  //     for (let unit of dataArray) {
+  //       if (unit.players.includes(player)) {
+  //         on.combineLineup(unit);
+  //       } else {
+  //         off.combineLineup(unit);
+  //       }
+  //     }
+  //     setOnCourt(on);
+  //     setOnBench(off);
+  //   } else {
+  //     setOnBench(null);
+  //     setOnCourt(null);
+  //   }
+  // }, [player, data, conPlay]);
 
   return (
     <Report>

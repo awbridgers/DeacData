@@ -14,18 +14,21 @@ import {useMediaQuery} from 'react-responsive';
 import {useSticky} from 'react-table-sticky';
 
 import styled from 'styled-components';
-import { getHeaderName } from '../util/getHeaderName';
+import {getHeaderName} from '../util/getHeaderName';
 
 interface iProps {
   data: Lineup[];
   type: string;
-  onClick? : ()=>void;
+  onClick?: () => void;
   filter: boolean;
   count: number;
 }
 
 const Table = ({data, type, onClick, filter, count}: iProps) => {
-  const tableData = useMemo<Lineup[]>(() => data.filter((x)=>x.possessions >= count || !filter), [data, count, filter]);
+  const tableData = useMemo<Lineup[]>(
+    () => data.filter((x) => x.possessions >= count || !filter),
+    [data, count, filter]
+  );
   const isMobile = useMediaQuery({maxWidth: '767px'});
 
   const tableColumns = useMemo<Column<Lineup>[]>(() => {
@@ -68,40 +71,58 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     <TableStyle>
       <div {...getTableProps()} className={`table sticky ${type}`}>
         <div className="thead">
-          {headerGroups.map((headerGroup) => (
-            <div {...headerGroup.getHeaderGroupProps()} className="tr">
-              {headerGroup.headers.map((column) => (
-                <div
-                  {...column.getHeaderProps(column.getSortByToggleProps())} title = {getHeaderName(column.id)}
-                  className={`th ${column.className}`}
-                >
-                  {column.id === 'players_placeholder_0' && type === 'total' ? (
-                    <CSVLink headers={csvHeaders} data={rows}>
-                      Download
-                    </CSVLink>
-                  ) : column.id === 'time_placeholder_1' && type === 'total' ? (
-                    <div style = {{cursor: 'pointer'}} onClick = {onClick}>Report</div>
-                  ) : (
-                    column.render('Header')
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+          {headerGroups.map((headerGroup) => {
+            const {key, ...props} = headerGroup.getHeaderGroupProps();
+            return (
+              <div key={key} {...props} className="tr">
+                {headerGroup.headers.map((column) => {
+                  const {key: columnKey, ...columnProps} =
+                    column.getHeaderProps(column.getSortByToggleProps());
+                  return (
+                    <div
+                      key={columnKey}
+                      {...columnProps}
+                      title={getHeaderName(column.id)}
+                      className={`th ${column.className}`}
+                    >
+                      {column.id === 'players_placeholder_0' &&
+                      type === 'total' ? (
+                        <CSVLink headers={csvHeaders} data={rows}>
+                          Download
+                        </CSVLink>
+                      ) : column.id === 'time_placeholder_1' &&
+                        type === 'total' ? (
+                        <div style={{cursor: 'pointer'}} onClick={onClick}>
+                          Report
+                        </div>
+                      ) : (
+                        column.render('Header')
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
         <div {...getTableBodyProps()} className="tbody">
-          {rows.map((row) => {
+          {rows.map((row) => {     
             prepareRow(row);
+            const {key: rowKey, ...rowProps} = row.getRowProps();
             return (
-              <div {...row.getRowProps()} className="tr">
-                {row.cells.map((cell) => (
-                  <div
-                    {...cell.getCellProps()}
-                    className={`td ${cell.column.className}`}
-                  >
-                    {cell.render('Cell')}
-                  </div>
-                ))}
+              <div key={rowKey} {...rowProps} className="tr">
+                {row.cells.map((cell) => {
+                  const {key: cellKey, ...cellProps} = cell.getCellProps();
+                  return (
+                    <div
+                      key={cellKey}
+                      {...cellProps}
+                      className={`td ${cell.column.className}`}
+                    >
+                      {cell.render('Cell')}
+                    </div>
+                  );
+                })}
               </div>
             );
           })}
@@ -110,9 +131,17 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
           {footerGroups.map(
             (foot, i) =>
               i === 0 && (
-                <div {...foot.getHeaderGroupProps()} className="tr">
+                <div
+                  {...foot.getHeaderGroupProps()}
+                  key={foot.getHeaderGroupProps().key}
+                  className="tr"
+                >
                   {foot.headers.map((column) => (
-                    <div {...column.getHeaderProps()} className="td">
+                    <div
+                      {...column.getHeaderProps()}
+                      key={column.getHeaderProps().key}
+                      className="td"
+                    >
                       {column.render('Footer')}
                     </div>
                   ))}

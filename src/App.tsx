@@ -1,14 +1,16 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {FirebaseContext} from './components/FirebaseProvider';
+import {useContext, useRef, useState} from 'react';
 import './App.css';
 import {Lineup} from './lineupClass';
-import {finderPlayer, group, seasonData, totalData} from './types';
+import {
+  finderPlayer,
+  group,
+  seasonData,
+} from './types';
 import Header from './components/Header';
 import Table from './components/Table';
 import Finder from './components/Finder';
-import {getLatestYear} from './util/getLatestYear';
-import {getYearlyData} from './util/yearlyData';
 import PlayerReport from './components/Report';
+import {FirebaseContext} from './components/FirebaseProvider';
 
 interface Iprops {
   data: seasonData;
@@ -23,26 +25,54 @@ const defaultFinder: finderPlayer[] = [
 ];
 
 const App = () => {
-  const data = useContext(FirebaseContext);
+  const data = useContext(FirebaseContext).store.data;
+  const years = useContext(FirebaseContext).years;
+  const fetchData = useContext(FirebaseContext).store.setData;
+
   //state variables
-  const [sortedData, setSortedData] = useState<Lineup[]>([]);
+  const [displayData, setDisplayData] = useState<Lineup[]>(
+    data[years[0]][0].lineups.sort((a, b) => b.time - a.time)
+  );
   const [finderData, setFinderData] = useState<Lineup[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  //games are order 0-32 so using -2 for season and -1 for conference totals
-  const [selectedGame, setSelectedGame] = useState<number>(-2);
+  const [selectedYear, setSelectedYear] = useState<string>(years[0]);
+  //games are order 0-32 so using -1 for season and -2 for conference totals etc
+  const [selectedGame, setSelectedGame] = useState<number>(0);
   const [selectedStat, setSelectedStat] = useState<string>('total');
   const [selectedGroup, setSelectedGroup] = useState<group>('lineups');
   const [showFinder, setShowFinder] = useState<boolean>(false);
   const [finderActive, setFinderActive] = useState<boolean>(false);
   const [showReport, setShowReport] = useState<boolean>(false);
   const [filterPoss, setFilterPoss] = useState<boolean>(true);
+  const saveSpot = useRef<number>(0)
   const [finderPlayers, setFinderPlayers] =
     useState<finderPlayer[]>(defaultFinder);
-
-  const changeYear = (year: string) => {
-    setSelectedGame(-2);
+    //change the year
+  const changeYear = async (year: string) => {
+    if (!data[year]) {
+      //this data doesn't exist
+      const newData = await fetchData(year);
+      setDisplayData(newData[selectedGroup]);
+    } else {
+      setDisplayData(
+        data[year][0][selectedGroup]
+      );
+    }
     setSelectedYear(year);
+    setSelectedGame(0);
   };
+  //change the selected game/category
+  const changeGame = (index: number) => {
+    if(finderActive){
+      saveSpot.current = selectedGame;
+    }
+    setDisplayData(data[selectedYear][index][selectedGroup]);
+    setSelectedGame(index);
+  };
+  //change group (lineups/players)
+  const changeGroup = (group: group)=>{
+    setSelectedGroup(group);
+    setDisplayData(data[selectedYear][selectedGame][group])
+  }
   const cancel = () => {
     setShowFinder(false);
     setFinderPlayers(defaultFinder);
@@ -56,8 +86,7 @@ const App = () => {
     const omit = finderPlayers.filter(
       (x) => x.type === 'omit' && x.name !== ''
     );
-    console.log(include);
-    const found = sortedData
+    const found = data[selectedYear][selectedGame].lineups
       .filter((lineups) =>
         include.every((name) => lineups.players.includes(name.name))
       )
@@ -68,32 +97,6 @@ const App = () => {
     setShowFinder(false);
     setFinderActive(true);
   };
-  //selected the most current year on launch
-  useEffect(() => {
-    if (data) {
-      if (!selectedYear) {
-        setSelectedYear(getLatestYear(data));
-      }
-    }
-  }, [data]);
-  useEffect(() => {
-    if (data && selectedYear) {
-      if (selectedGroup === 'yearly') {
-        setSortedData(getYearlyData(data));
-      } else {
-        const playerOrTeam = selectedGroup;
-        const year = data[selectedYear];
-        const unsorted =
-          selectedGame === -2
-            ? year.season[playerOrTeam]
-            : selectedGame === -1
-            ? year.conference[playerOrTeam]
-            : year.games[selectedGame].stats[playerOrTeam];
-        const sorted = unsorted.sort((a, b) => b.time - a.time);
-        setSortedData(sorted);
-      }
-    }
-  }, [data, selectedGame, selectedYear, selectedGroup, filterPoss]);
   if (!data || !selectedYear) {
     return <div>Loading...</div>;
   }
@@ -103,31 +106,23 @@ const App = () => {
         selectedYear={selectedYear}
         selectedGame={selectedGame}
         selectedStat={selectedStat}
-        games={data[selectedYear].games}
-        years={Object.keys(data)}
         selectedGroup={selectedGroup}
         changeShowFinder={setShowFinder}
         changeYear={changeYear}
-        changeGame={setSelectedGame}
+        changeGame={changeGame}
         changeStat={setSelectedStat}
-        changeGroup={setSelectedGroup}
+        changeGroup={changeGroup}
         finderActive={finderActive}
         changeFinderActive={cancel}
         filter={filterPoss}
         setFilter={setFilterPoss}
       />
       <Table
-        data={finderActive ? finderData : sortedData}
+        data={finderActive ? finderData : displayData}
         type={selectedStat}
         onClick={() => setShowReport(true)}
         filter={filterPoss}
-        count={
-          selectedGame === -2
-            ? data[selectedYear].season.count
-            : selectedGame === -1
-            ? data[selectedYear].conference.count
-            : 0
-        }
+        count={data[selectedYear][selectedGame].gameCount}
       />
       {showReport && (
         <PlayerReport

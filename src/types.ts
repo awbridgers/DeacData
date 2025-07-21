@@ -1,6 +1,6 @@
-import { Lineup } from './lineupClass';
+import {dbData, Lineup} from './lineupClass';
 
-export interface player{
+export interface player {
   name: string;
   number: number;
 }
@@ -9,35 +9,45 @@ export interface gameData {
   score: {
     wake: number;
     opp: number;
-  }
-  accGame: boolean;
+  };
   order: number;
-  stats: gameStats;
-  game: string
-};
+  lineups: Lineup[];
+  players: Lineup[];
+  game: string;
+  gameCount: number;
+}
 
-export interface gameStats{
+export interface stats {
   lineups: Lineup[];
   players: Lineup[];
   count: number;
 }
 
 export interface seasonData {
-  games: gameData[];
-  season: gameStats;
-  conference: gameStats;
+  
 }
 
-export interface totalData {
-  [year:string]: seasonData
+export interface dynastyData {
+  [year: string]: gameData[];
 }
-
 
 export interface rawData {
-  [year:string] : gameData[];
+    score: {
+      wake: number;
+      opp: number;
+    };
+    order: number;
+    lineups: {[key: string]: dbData};
+    players: {[key: string]: dbData};
+    game: string;
+    gameCount: number;
 }
 export interface finderPlayer {
   name: string;
-  type: 'omit'| 'include'
+  type: 'omit' | 'include';
 }
-export type group = 'yearly'|'players'|'lineups'
+export type group =  'players' | 'lineups';
+
+export interface yearlyTotals {
+  [year: string]: Lineup;
+}

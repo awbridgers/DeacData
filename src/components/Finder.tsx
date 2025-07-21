@@ -48,20 +48,14 @@ const customStyle = {
 };
 
 const Finder = ({year, players, changePlayers, cancel,submit}: FinderProps) => {
+ 
+  const data = useContext(FirebaseContext).store.data[year][0];
   const [roster, setRoster] = useState<Options[]>([]);
-  const data = useContext(FirebaseContext);
 
-  useEffect(() => {
-    //get the roster from the list of player data
-    if (data) {
-      setRoster(
-        data[year].season.players.sort((a,b)=>b.time - a.time).map((x) => ({
-          label: x.players,
-          value: x.players,
-        }))
-      );
-    }
-  }, [year]);
+
+  useEffect(()=>{
+    setRoster(Object.values(data.players).map(x=>({value:x.players, label:x.players})))
+  },[data])
 
   return (
     <Styles>
