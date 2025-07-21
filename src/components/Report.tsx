@@ -1,21 +1,18 @@
-import {Dispatch, useContext, useEffect, useState} from 'react';
-import Select, {components, CSSObjectWithLabel} from 'react-select';
-import {gameData, group, seasonData} from '../types';
+import {useContext, useMemo, useState} from 'react';
+import Select, {CSSObjectWithLabel} from 'react-select';
 import Switch from 'react-switch';
 import '../App.css';
 import {Lineup} from '../lineupClass';
-import {HeaderStyle} from '../styles/header';
 import styled, {CSSProperties} from 'styled-components';
 import {FirebaseContext} from './FirebaseProvider';
 interface IProps {
-  data: seasonData;
+  year: string;
   back: () => void;
 }
 interface Options {
   value: string;
   label: string;
 }
-const nullOption = {label: '', value: ''};
 const format = new Intl.NumberFormat('en-us', {
   signDisplay: 'always',
   maximumFractionDigits: 1,
@@ -25,13 +22,11 @@ const percent = new Intl.NumberFormat('en-us', {
   minimumFractionDigits: 1,
 });
 
-const PlayerReport = ({data, back}: IProps) => {
-  const [roster, setRoster] = useState<Options[]>([]);
+const PlayerReport = ({year, back}: IProps) => {
+  const data = useContext(FirebaseContext).store.data[year];
   const [player, setPlayer] = useState<string>('');
-  const [onCourt, setOnCourt] = useState<Lineup | null>();
-  const [onBench, setOnBench] = useState<Lineup | null>();
+  const [category, setCategory] = useState<number>(0);
   const [conPlay, setConPlay] = useState<boolean>(false);
-
   const styleNum = (
     stat1: Number | undefined,
     stat2: Number | undefined
@@ -42,37 +37,22 @@ const PlayerReport = ({data, back}: IProps) => {
     return {};
   };
 
-  // useEffect(() => {
-  //   //get the roster from the list of player data
-  //   setRoster(
-  //     data.season.players
-  //       .sort((a, b) => b.time - a.time)
-  //       .map((x) => ({
-  //         label: x.players,
-  //         value: x.players,
-  //       }))
-  //   );
-  // }, [data]);
-  // useEffect(() => {
-  //   if (player && data) {
-  //     let on = new Lineup(player);
-  //     let off = new Lineup('rest');
-  //     const dataArray = conPlay ? data.conference.lineups : data.season.lineups
-  //     for (let unit of dataArray) {
-  //       if (unit.players.includes(player)) {
-  //         on.combineLineup(unit);
-  //       } else {
-  //         off.combineLineup(unit);
-  //       }
-  //     }
-  //     setOnCourt(on);
-  //     setOnBench(off);
-  //   } else {
-  //     setOnBench(null);
-  //     setOnCourt(null);
-  //   }
-  // }, [player, data, conPlay]);
-
+  const onCourt = useMemo(() => {
+    if (!player) return null;
+    const res = new Lineup('on');
+    data[category].lineups.forEach((lineup) => {
+      if (lineup.players.includes(player)) res.combineLineup(lineup);
+    });
+    return res;
+  }, [player, category, data]);
+  const offCourt = useMemo(() => {
+    if (!player) return null;
+    const res = new Lineup('off');
+    data[category].lineups.forEach((lineup) => {
+      if (!lineup.players.includes(player)) res.combineLineup(lineup);
+    });
+    return res;
+  }, [player, category, data]);
   return (
     <Report>
       <div className="title">Player Report</div>
@@ -82,7 +62,10 @@ const PlayerReport = ({data, back}: IProps) => {
           onChange={(picked) => {
             setPlayer(picked ? picked.value : '');
           }}
-          options={roster}
+          options={data[0].players.map((x) => ({
+            value: x.players,
+            label: x.players,
+          }))}
           //isClearable
           isSearchable={false}
           className="select"
@@ -114,39 +97,39 @@ const PlayerReport = ({data, back}: IProps) => {
           <tr>
             <td>O Rtg</td>
             <td>{onCourt?.oRating.toFixed(1)}</td>
-            <td>{onBench?.oRating.toFixed(1)}</td>
+            <td>{offCourt?.oRating.toFixed(1)}</td>
             <td
               className="diff"
-              style={styleNum(onCourt?.oRating, onBench?.oRating)}
+              style={styleNum(onCourt?.oRating, offCourt?.oRating)}
             >
-              {onCourt && onBench
-                ? format.format(onCourt.oRating - onBench.oRating)
+              {onCourt && offCourt
+                ? format.format(onCourt.oRating - offCourt.oRating)
                 : null}
             </td>
           </tr>
           <tr>
             <td>D Rtg</td>
             <td>{onCourt?.dRating.toFixed(1)}</td>
-            <td>{onBench?.dRating.toFixed(1)}</td>
+            <td>{offCourt?.dRating.toFixed(1)}</td>
             <td
               className="diff"
-              style={styleNum(onBench?.dRating, onCourt?.dRating)}
+              style={styleNum(offCourt?.dRating, onCourt?.dRating)}
             >
-              {onCourt && onBench
-                ? format.format(onCourt.dRating - onBench.dRating)
+              {onCourt && offCourt
+                ? format.format(onCourt.dRating - offCourt.dRating)
                 : null}
             </td>
           </tr>
           <tr>
             <td>eFG%</td>
             <td>{onCourt ? percent.format(onCourt.eFGFor * 100) : null}</td>
-            <td>{onBench ? percent.format(onBench.eFGFor * 100) : null}</td>
+            <td>{offCourt ? percent.format(offCourt.eFGFor * 100) : null}</td>
             <td
               className="diff"
-              style={styleNum(onCourt?.eFGFor, onBench?.eFGFor)}
+              style={styleNum(onCourt?.eFGFor, offCourt?.eFGFor)}
             >
-              {onCourt && onBench
-                ? format.format((onCourt.eFGFor - onBench.eFGFor) * 100)
+              {onCourt && offCourt
+                ? format.format((onCourt.eFGFor - offCourt.eFGFor) * 100)
                 : null}
             </td>
           </tr>
@@ -156,18 +139,18 @@ const PlayerReport = ({data, back}: IProps) => {
               {onCourt ? percent.format(onCourt.totalRebPercent * 100) : null}
             </td>
             <td>
-              {onBench ? percent.format(onBench.totalRebPercent * 100) : null}
+              {offCourt ? percent.format(offCourt.totalRebPercent * 100) : null}
             </td>
             <td
               className="diff"
               style={styleNum(
                 onCourt?.totalRebPercent,
-                onBench?.totalRebPercent
+                offCourt?.totalRebPercent
               )}
             >
-              {onCourt && onBench
+              {onCourt && offCourt
                 ? format.format(
-                    (onCourt.totalRebPercent - onBench.totalRebPercent) * 100
+                    (onCourt.totalRebPercent - offCourt.totalRebPercent) * 100
                   )
                 : null}
             </td>
@@ -182,27 +165,27 @@ const PlayerReport = ({data, back}: IProps) => {
                 : null}
             </td>
             <td>
-              {onBench
+              {offCourt
                 ? percent.format(
-                    (onBench.assistsFor * 100) / onBench.totalShots.madeFor
+                    (offCourt.assistsFor * 100) / offCourt.totalShots.madeFor
                   )
                 : null}
             </td>
             <td
               className="diff"
               style={
-                onCourt && onBench
+                onCourt && offCourt
                   ? styleNum(
                       onCourt?.assistsFor / onCourt.totalShots.madeFor,
-                      onBench?.assistsFor / onBench.totalShots.madeFor
+                      offCourt?.assistsFor / offCourt.totalShots.madeFor
                     )
                   : {}
               }
             >
-              {onCourt && onBench
+              {onCourt && offCourt
                 ? format.format(
                     (onCourt.assistsFor * 100) / onCourt.totalShots.madeFor -
-                      (onBench.assistsFor * 100) / onBench.totalShots.madeFor
+                      (offCourt.assistsFor * 100) / offCourt.totalShots.madeFor
                   )
                 : null}
             </td>
@@ -210,42 +193,41 @@ const PlayerReport = ({data, back}: IProps) => {
           <tr>
             <td>Net +/-</td>
             <td>{onCourt ? format.format(onCourt.netPoints) : null}</td>
-            <td>{onBench ? format.format(onBench.netPoints) : null}</td>
+            <td>{offCourt ? format.format(offCourt.netPoints) : null}</td>
             <td
               className="diff"
-              style={styleNum(onCourt?.netPoints, onBench?.netPoints)}
+              style={styleNum(onCourt?.netPoints, offCourt?.netPoints)}
             >
-              {onCourt && onBench
-                ? format.format(onCourt.netPoints - onBench.netPoints)
+              {onCourt && offCourt
+                ? format.format(onCourt.netPoints - offCourt.netPoints)
                 : null}
             </td>
           </tr>
           <tr>
             <td>Poss</td>
             <td>{onCourt && Math.round(onCourt.possessions)}</td>
-            <td>{onBench && Math.round(onBench.possessions)}</td>
+            <td>{offCourt && Math.round(offCourt.possessions)}</td>
             <td
               className="diff"
-              style={styleNum(onCourt?.possessions, onBench?.possessions)}
+              style={styleNum(onCourt?.possessions, offCourt?.possessions)}
             >
-              {onCourt && onBench
+              {onCourt && offCourt
                 ? format.format(
-                    Math.round(onCourt.possessions - onBench.possessions)
+                    Math.round(onCourt.possessions - offCourt.possessions)
                   )
                 : null}
             </td>
           </tr>
         </tbody>
       </table>
-        <div style = {{margin: '5px 0px'}}>
-          <span className = 'label'>ACC Play Only</span>
-          <Switch
-            checked={conPlay}
-            onChange={(checked) => setConPlay(checked)}
-            borderRadius={20}
-            className="slider"
-
-          />
+      <div style={{margin: '5px 0px'}}>
+        <span className="label">ACC Play Only</span>
+        <Switch
+          checked={conPlay}
+          onChange={(checked) => setConPlay(checked)}
+          borderRadius={20}
+          className="slider"
+        />
       </div>
       <button className="cancel" onClick={back}>
         Back
@@ -280,7 +262,7 @@ const Report = styled.div`
     width: 80%;
     margin: auto;
   }
-  .slider{
+  .slider {
     vertical-align: middle;
   }
   .cancel {

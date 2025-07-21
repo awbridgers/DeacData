@@ -23,9 +23,7 @@ export interface stats {
   count: number;
 }
 
-export interface seasonData {
-  
-}
+
 
 export interface dynastyData {
   [year: string]: gameData[];

@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import Select, {components} from 'react-select';
-import {gameData, group, seasonData} from '../types';
+import {gameData, group} from '../types';
 import Switch from 'react-switch';
 import '../App.css';
 import {Lineup} from '../lineupClass';

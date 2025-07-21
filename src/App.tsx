@@ -4,7 +4,6 @@ import {Lineup} from './lineupClass';
 import {
   finderPlayer,
   group,
-  seasonData,
 } from './types';
 import Header from './components/Header';
 import Table from './components/Table';
@@ -12,9 +11,7 @@ import Finder from './components/Finder';
 import PlayerReport from './components/Report';
 import {FirebaseContext} from './components/FirebaseProvider';
 
-interface Iprops {
-  data: seasonData;
-}
+
 
 const defaultFinder: finderPlayer[] = [
   {name: '', type: 'include'},
@@ -46,6 +43,7 @@ const App = () => {
   const saveSpot = useRef<number>(0)
   const [finderPlayers, setFinderPlayers] =
     useState<finderPlayer[]>(defaultFinder);
+
     //change the year
   const changeYear = async (year: string) => {
     if (!data[year]) {
@@ -126,8 +124,11 @@ const App = () => {
       />
       {showReport && (
         <PlayerReport
-          data={data[selectedYear]}
+        
+          year={selectedYear}
           back={() => setShowReport(false)}
+          key = {selectedYear}
+          
         />
       )}
       {showFinder && (
