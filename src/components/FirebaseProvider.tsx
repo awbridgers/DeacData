@@ -3,6 +3,7 @@ import firebase from '../firebaseConfig';
 import {createContext, ReactNode, useEffect, useState} from 'react';
 import {Lineup} from '../lineupClass';
 import {rawData, dynastyData, gameData} from '../types';
+import categories from '../util/categories'
 
 interface IProvider {
   children: ReactNode;
@@ -23,17 +24,7 @@ const initData: appContext = {
   },
 };
 
-const categories = [
-  'Total',
-  'Conference',
-  'Non-Conference',
-  'Home',
-  'Away',
-  'Q1',
-  'Q2',
-  'Q3',
-  'Q4',
-];
+
 
 export const FirebaseContext = createContext<appContext>(initData);
 

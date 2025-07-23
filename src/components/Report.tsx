@@ -5,6 +5,7 @@ import '../App.css';
 import {Lineup} from '../lineupClass';
 import styled, {CSSProperties} from 'styled-components';
 import {FirebaseContext} from './FirebaseProvider';
+import categories from '../util/categories'
 interface IProps {
   year: string;
   back: () => void;
@@ -21,6 +22,7 @@ const percent = new Intl.NumberFormat('en-us', {
   maximumFractionDigits: 1,
   minimumFractionDigits: 1,
 });
+
 
 const PlayerReport = ({year, back}: IProps) => {
   const data = useContext(FirebaseContext).store.data[year];
@@ -82,6 +84,29 @@ const PlayerReport = ({year, back}: IProps) => {
           }}
           placeholder={`Select a Player`}
           isOptionDisabled={(option) => option.value === player}
+        />
+        <Select<{value: number, label: string}>
+          value={{value: category, label: categories[category]}}
+          onChange={(picked) => {
+            setCategory(picked ? picked.value : category);
+          }}
+          options={categories.map((x,i)=>({value: i, label: x}))}
+          //isClearable
+          isSearchable={false}
+          className="select"
+          styles={{
+            indicatorsContainer: (provided: CSSObjectWithLabel) => ({
+              ...provided,
+              position: 'absolute',
+              right: '0px',
+            }),
+            valueContainer: (provided: CSSObjectWithLabel) => ({
+              ...provided,
+              fontSize: '24px',
+            }),
+          }}
+          placeholder={`Select a Player`}
+          isOptionDisabled={(option) => option.value === category}
         />
       </div>
       <table className="reportTable">
@@ -220,15 +245,6 @@ const PlayerReport = ({year, back}: IProps) => {
           </tr>
         </tbody>
       </table>
-      <div style={{margin: '5px 0px'}}>
-        <span className="label">ACC Play Only</span>
-        <Switch
-          checked={conPlay}
-          onChange={(checked) => setConPlay(checked)}
-          borderRadius={20}
-          className="slider"
-        />
-      </div>
       <button className="cancel" onClick={back}>
         Back
       </button>
@@ -261,6 +277,9 @@ const Report = styled.div`
   .selectBox {
     width: 80%;
     margin: auto;
+  }
+  .select{
+    margin: 5px;
   }
   .slider {
     vertical-align: middle;

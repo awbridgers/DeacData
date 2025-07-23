@@ -2,15 +2,12 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
-  useEffect,
   useMemo,
-  useState,
 } from 'react';
 import Select, {components} from 'react-select';
-import {gameData, group} from '../types';
+import {group} from '../types';
 import Switch from 'react-switch';
 import '../App.css';
-import {Lineup} from '../lineupClass';
 import {Filter, HeaderStyle} from '../styles/header';
 import {FirebaseContext} from './FirebaseProvider';
 
@@ -129,7 +126,7 @@ const Header = ({
               getOptionValue={(option) => option.value}
               className="select year"
               isSearchable={false}
-              isDisabled={finderActive || selectedGroup === 'yearly'}
+              isDisabled={finderActive}
               styles={{
                 control: (provided) => ({...provided, padding: '5px 0px'}),
                 valueContainer: (provided) => ({
@@ -177,7 +174,7 @@ const Header = ({
 
           <div className="selectContainer">
             <Select<gameChoice>
-              options={finderActive ? gameOptions.slice(0,9) : gameOptions}
+              options={gameOptions}
               value={gameOptions.find((x) => x.value === selectedGame)}
               onChange={(picked) =>
                 picked
