@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/lineup-data-viewer/static/css/main.6b64b217.css",
-    "main.js": "/lineup-data-viewer/static/js/main.a3bf2eee.js",
-    "static/js/453.3fd7b0fb.chunk.js": "/lineup-data-viewer/static/js/453.3fd7b0fb.chunk.js",
-    "index.html": "/lineup-data-viewer/index.html",
-    "main.6b64b217.css.map": "/lineup-data-viewer/static/css/main.6b64b217.css.map",
-    "main.a3bf2eee.js.map": "/lineup-data-viewer/static/js/main.a3bf2eee.js.map",
-    "453.3fd7b0fb.chunk.js.map": "/lineup-data-viewer/static/js/453.3fd7b0fb.chunk.js.map"
+    "main.css": "/DeacData/static/css/main.6b64b217.css",
+    "main.js": "/DeacData/static/js/main.f9650e85.js",
+    "static/js/453.3fd7b0fb.chunk.js": "/DeacData/static/js/453.3fd7b0fb.chunk.js",
+    "index.html": "/DeacData/index.html",
+    "main.6b64b217.css.map": "/DeacData/static/css/main.6b64b217.css.map",
+    "main.f9650e85.js.map": "/DeacData/static/js/main.f9650e85.js.map",
+    "453.3fd7b0fb.chunk.js.map": "/DeacData/static/js/453.3fd7b0fb.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6b64b217.css",
-    "static/js/main.a3bf2eee.js"
+    "static/js/main.f9650e85.js"
   ]
 }
