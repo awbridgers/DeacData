@@ -3,7 +3,6 @@ import {Lineup} from '../lineupClass';
 import {total, net, advanced, shooting, csvHeaders} from '../util/tableSetup';
 import {
   Column,
-  useBlockLayout,
   useTable,
   useSortBy,
   useFlexLayout,
@@ -13,7 +12,6 @@ import {TableStyle} from '../styles/table';
 import {useMediaQuery} from 'react-responsive';
 import {useSticky} from 'react-table-sticky';
 
-import styled from 'styled-components';
 import {getHeaderName} from '../util/getHeaderName';
 
 interface iProps {
@@ -52,7 +50,7 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
       width: isMobile ? 15 : 30, // width is used for both the flex-basis and flex-grow
       maxWidth: isMobile ? 80 : 200, // maxWidth is only used as a limit for resizing
     }),
-    []
+    [isMobile]
   );
   const {
     getTableProps,

@@ -1,14 +1,15 @@
 import {useContext, useMemo, useState} from 'react';
 import Select, {CSSObjectWithLabel} from 'react-select';
-import Switch from 'react-switch';
 import '../App.css';
 import {Lineup} from '../lineupClass';
 import styled, {CSSProperties} from 'styled-components';
 import {FirebaseContext} from './FirebaseProvider';
 import categories from '../util/categories'
+import { gender } from '../types';
 interface IProps {
   year: string;
   back: () => void;
+  gender: gender;
 }
 interface Options {
   value: string;
@@ -24,11 +25,10 @@ const percent = new Intl.NumberFormat('en-us', {
 });
 
 
-const PlayerReport = ({year, back}: IProps) => {
-  const data = useContext(FirebaseContext).store.data[year];
+const PlayerReport = ({year, back, gender}: IProps) => {
+  const data = useContext(FirebaseContext).store.data[gender][year];
   const [player, setPlayer] = useState<string>('');
   const [category, setCategory] = useState<number>(0);
-  const [conPlay, setConPlay] = useState<boolean>(false);
   const styleNum = (
     stat1: Number | undefined,
     stat2: Number | undefined

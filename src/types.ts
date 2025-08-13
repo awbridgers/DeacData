@@ -26,7 +26,8 @@ export interface stats {
 
 
 export interface dynastyData {
-  [year: string]: gameData[];
+  men: {[year: string]: gameData[];};
+  women: {[year: string]: gameData[];};
 }
 
 export interface rawData {
@@ -45,7 +46,9 @@ export interface finderPlayer {
   type: 'omit' | 'include';
 }
 export type group =  'players' | 'lineups';
+export type gender = 'women' | 'men'
 
 export interface yearlyTotals {
   [year: string]: Lineup;
 }
+

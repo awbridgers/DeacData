@@ -1,14 +1,9 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useMemo,
-} from 'react';
+import {Dispatch, SetStateAction, useContext, useMemo} from 'react';
 import Select, {components} from 'react-select';
-import {group} from '../types';
+import {gender, group} from '../types';
 import Switch from 'react-switch';
 import '../App.css';
-import {Filter, HeaderStyle} from '../styles/header';
+import {Toggles, HeaderStyle, ToggleButton} from '../styles/header';
 import {FirebaseContext} from './FirebaseProvider';
 
 interface iProps {
@@ -17,7 +12,7 @@ interface iProps {
   selectedStat: string;
   finderActive: boolean;
   selectedGroup: string;
-  changeGroup: (group: group)=>void;
+  changeGroup: (group: group) => void;
   changeYear: (picked: string) => void;
   changeGame: (index: number) => void;
   changeStat: Dispatch<SetStateAction<string>>;
@@ -25,6 +20,8 @@ interface iProps {
   changeFinderActive: () => void;
   filter: boolean;
   setFilter: Dispatch<SetStateAction<boolean>>;
+  gender: gender;
+  setGender: (gender:gender)=>void;
 }
 interface gameChoice {
   label: string;
@@ -66,8 +63,6 @@ const groupOptions: groupChoice[] = [
   {value: 'players', label: 'Players'},
 ];
 
-
-
 //custom control compononet for select
 const Control = (props: any) => {
   return (
@@ -77,6 +72,21 @@ const Control = (props: any) => {
     </>
   );
 };
+
+const checkedIcon = (
+  <svg
+    height="100%"
+    width="100%"
+    viewBox="-2 -5 17 21"
+    style={{position: 'absolute', top: 0}}
+  >
+    <path
+      d="M11.264 0L5.26 6.004 2.103 2.847 0 4.95l5.26 5.26 8.108-8.107L11.264 0"
+      fill="#000000"
+      fillRule="evenodd"
+    />
+  </svg>
+);
 
 const Header = ({
   selectedGroup,
@@ -92,11 +102,13 @@ const Header = ({
   changeFinderActive,
   filter,
   setFilter,
+  gender,
+  setGender,
 }: iProps) => {
-  const years = useContext(FirebaseContext).years;
-  const data = useContext(FirebaseContext).store.data[selectedYear]
+  const years = useContext(FirebaseContext).years[gender];
+  const data = useContext(FirebaseContext).store.data[gender][selectedYear];
   const gameOptions: gameChoice[] = useMemo(
-    () => data.map((x,i)=>({label: x.game, value: i})),
+    () => data.map((x, i) => ({label: x.game, value: i})),
     [data]
   );
 
@@ -159,7 +171,7 @@ const Header = ({
           )}
           {!finderActive && (
             <div className="gameInfo">
-              {selectedGame < 9 ? (
+              {selectedGame < 10 ? (
                 <div className="totals">{data[selectedGame].game}</div>
               ) : (
                 <div className="score">
@@ -255,17 +267,55 @@ const Header = ({
           </div>
         </div>
       </HeaderStyle>
-      <Filter>
-        <label style={{margin: '0px 5px'}}>Poss Limit</label>
-        <Switch
-          checked={filter}
-          onChange={(checked) => setFilter(checked)}
-          height={20}
-          width={35}
-          handleDiameter={18}
-          disabled={selectedGame >= 9}
-        />
-      </Filter>
+      <Toggles>
+        <ToggleButton>
+          <label style={{margin: '0px 5px'}}>Poss Limit</label>
+          <Switch
+            checked={filter}
+            checkedIcon = {checkedIcon}
+            onChange={(checked) => setFilter(checked)}
+            height={20}
+            width={40}
+            handleDiameter={18}
+            disabled={selectedGame >= 10}
+            borderRadius={6}
+            onColor="#cfb53b"
+            offColor="#474747"
+          />
+        </ToggleButton>
+        <ToggleButton>
+          <label
+            style={{
+              margin: '0px 5px',
+              color: gender === 'men' ? 'white' : '#474747',
+              fontWeight: 'bold',
+            }}
+          >
+            Men
+          </label>
+          <Switch
+            checked={gender === 'women'}
+            onChange={(checked) => setGender(checked ? 'women' : 'men')}
+            onColor="#cfb53b"
+            offColor="#cfb53b"
+            height={20}
+            width={35}
+            handleDiameter={18}
+            checkedIcon={false}
+            uncheckedIcon={false}
+            borderRadius={6}
+          />
+          <label
+            style={{
+              margin: '0px 5px',
+              color: gender === 'women' ? 'white' : '#5b5b5b',
+              fontWeight: 'bold',
+            }}
+          >
+            Women
+          </label>
+        </ToggleButton>
+      </Toggles>
     </div>
   );
 };

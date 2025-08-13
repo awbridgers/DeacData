@@ -8,6 +8,7 @@ export const HeaderStyle = styled.div`
   flex-direction: row wrap;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
   
 
   .headerGameControls {
@@ -110,6 +111,7 @@ export const HeaderStyle = styled.div`
     
   }
   @media screen and (max-width: 850px) {
+    margin-bottom: 20px;
     .playerSwitch button,
     .headerFinder button {
       width: 100px;
@@ -166,9 +168,17 @@ export const HeaderStyle = styled.div`
   }
 `;
 
-export const Filter = styled.div`
+export const Toggles = styled.div`
   color: white;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
+  width: 100%;
+
+`
+export const ToggleButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+    font-size: 18px;
 `

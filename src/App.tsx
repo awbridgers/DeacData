@@ -1,7 +1,7 @@
-import {useContext, useRef, useState} from 'react';
+import {useContext, useState} from 'react';
 import './App.css';
 import {Lineup} from './lineupClass';
-import {finderPlayer, group} from './types';
+import {finderPlayer, gender, group} from './types';
 import Header from './components/Header';
 import Table from './components/Table';
 import Finder from './components/Finder';
@@ -20,12 +20,13 @@ const App = () => {
   const data = useContext(FirebaseContext).store.data;
   const years = useContext(FirebaseContext).years;
   const fetchData = useContext(FirebaseContext).store.setData;
+  //console.log(data, years)
 
   //state variables
   const [displayData, setDisplayData] = useState<Lineup[]>(
-    data[years[0]][0].lineups.sort((a, b) => b.time - a.time)
+    data.men[years.men[0]][0].lineups.sort((a, b) => b.time - a.time)
   );
-  const [selectedYear, setSelectedYear] = useState<string>(years[0]);
+  const [selectedYear, setSelectedYear] = useState<string>(years.men[0]);
   //games are order 0-32 so using -1 for season and -2 for conference totals etc
   const [selectedGame, setSelectedGame] = useState<number>(0);
   const [selectedStat, setSelectedStat] = useState<string>('total');
@@ -34,6 +35,7 @@ const App = () => {
   const [finderActive, setFinderActive] = useState<boolean>(false);
   const [showReport, setShowReport] = useState<boolean>(false);
   const [filterPoss, setFilterPoss] = useState<boolean>(true);
+  const [gender, setGender] = useState<gender>('men')
   const [finderPlayers, setFinderPlayers] =
     useState<finderPlayer[]>(defaultFinder);
   //const prevGame = useRef<number>(0);
@@ -41,22 +43,27 @@ const App = () => {
 
   //change the year
   const changeYear = async (year: string) => {
-    if (!data[year]) {
+    //if the selected game is outside of the 9 standard for all years,
+    //change the selected game back to 0 for total.
+    const game = selectedGame >= 10 ? 0 : selectedGame
+    if (!data[gender][year]) {
       //this data doesn't exist
-      const newData = await fetchData(year);
-      setDisplayData(newData[selectedGroup]);
+      const newData = await fetchData(year, gender);
+      console.log(newData, game)
+      setDisplayData(newData[game][selectedGroup]);
     } else {
-      setDisplayData(data[year][0][selectedGroup]);
+      setDisplayData(data[gender][year][game][selectedGroup]);
     }
     setSelectedYear(year);
-    setSelectedGame(0);
+    setSelectedGame(game);
   };
   //change the selected game/category
   const changeGame = (index: number) => {
+    console.log('test')
     if (finderActive) {
       findLineups(index);
     } else {
-      setDisplayData(data[selectedYear][index][selectedGroup]);
+      setDisplayData(data[gender][selectedYear][index][selectedGroup]);
       
     }
     setSelectedGame(index);
@@ -64,13 +71,29 @@ const App = () => {
   //change group (lineups/players)
   const changeGroup = (group: group) => {
     setSelectedGroup(group);
-    setDisplayData(data[selectedYear][selectedGame][group]);
+    setDisplayData(data[gender][selectedYear][selectedGame][group]);
   };
+  const changeGender = async (sex:gender)=>{
+    //if the selected game is outside of the 9 standard for all years,
+    //change the selected game back to 0 for total.
+    const game = selectedGame >= 10 ? 0 : selectedGame
+    if(!data[sex][selectedYear]){
+      const newData = await fetchData(selectedYear, sex);
+      setDisplayData(newData[game][selectedGroup])
+    }else{
+      setDisplayData(data[sex][selectedYear][game][selectedGroup])
+    }
+    setGender(sex);
+    setSelectedGame(game);
+    
+    //the years and games will be different between the genders
+    //so we need to reset those to default
+  }
   const cancel = () => {
     setShowFinder(false);
     setFinderPlayers(defaultFinder);
     setFinderActive(false);
-    setDisplayData(data[selectedYear][selectedGame].lineups)
+    setDisplayData(data[gender][selectedYear][selectedGame].lineups)
   };
   const findLineups = (category:number) => {
     //split the players into omitted and included
@@ -80,7 +103,7 @@ const App = () => {
     const omit = finderPlayers.filter(
       (x) => x.type === 'omit' && x.name !== ''
     );
-    const found = data[selectedYear][category].lineups
+    const found = data[gender][selectedYear][category].lineups
       .filter((lineups) =>
         include.every((name) => lineups.players.includes(name.name))
       )
@@ -112,17 +135,20 @@ const App = () => {
         changeFinderActive={cancel}
         filter={filterPoss}
         setFilter={setFilterPoss}
+        gender = {gender}
+        setGender = {changeGender}
       />
       <Table
         data={displayData}
         type={selectedStat}
         onClick={() => setShowReport(true)}
         filter={filterPoss}
-        count={data[selectedYear][selectedGame].gameCount}
+        count={data[gender][selectedYear][selectedGame].gameCount}
       />
       {showReport && (
         <PlayerReport
           year={selectedYear}
+          gender = {gender}
           back={() => setShowReport(false)}
           key={selectedYear}
         />
@@ -130,6 +156,7 @@ const App = () => {
       {showFinder && (
         <Finder
           year={selectedYear}
+          gender={gender}
           players={finderPlayers}
           changePlayers={setFinderPlayers}
           cancel={() => setShowFinder(false)}
