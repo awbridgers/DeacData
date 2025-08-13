@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/lineup-data-viewer/static/css/main.c9eaab30.css",
-    "main.js": "/lineup-data-viewer/static/js/main.3d303bc3.js",
-    "static/js/787.37e5b032.chunk.js": "/lineup-data-viewer/static/js/787.37e5b032.chunk.js",
+    "main.css": "/lineup-data-viewer/static/css/main.6b64b217.css",
+    "main.js": "/lineup-data-viewer/static/js/main.a3bf2eee.js",
+    "static/js/453.3fd7b0fb.chunk.js": "/lineup-data-viewer/static/js/453.3fd7b0fb.chunk.js",
     "index.html": "/lineup-data-viewer/index.html",
-    "main.c9eaab30.css.map": "/lineup-data-viewer/static/css/main.c9eaab30.css.map",
-    "main.3d303bc3.js.map": "/lineup-data-viewer/static/js/main.3d303bc3.js.map",
-    "787.37e5b032.chunk.js.map": "/lineup-data-viewer/static/js/787.37e5b032.chunk.js.map"
+    "main.6b64b217.css.map": "/lineup-data-viewer/static/css/main.6b64b217.css.map",
+    "main.a3bf2eee.js.map": "/lineup-data-viewer/static/js/main.a3bf2eee.js.map",
+    "453.3fd7b0fb.chunk.js.map": "/lineup-data-viewer/static/js/453.3fd7b0fb.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c9eaab30.css",
-    "static/js/main.3d303bc3.js"
+    "static/css/main.6b64b217.css",
+    "static/js/main.a3bf2eee.js"
   ]
 }
