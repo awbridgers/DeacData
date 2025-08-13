@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/DeacData/static/css/main.6b64b217.css",
-    "main.js": "/DeacData/static/js/main.f9650e85.js",
-    "static/js/453.3fd7b0fb.chunk.js": "/DeacData/static/js/453.3fd7b0fb.chunk.js",
+    "main.js": "/DeacData/static/js/main.5cac6faf.js",
+    "static/js/453.b4f80cb9.chunk.js": "/DeacData/static/js/453.b4f80cb9.chunk.js",
     "index.html": "/DeacData/index.html",
     "main.6b64b217.css.map": "/DeacData/static/css/main.6b64b217.css.map",
-    "main.f9650e85.js.map": "/DeacData/static/js/main.f9650e85.js.map",
-    "453.3fd7b0fb.chunk.js.map": "/DeacData/static/js/453.3fd7b0fb.chunk.js.map"
+    "main.5cac6faf.js.map": "/DeacData/static/js/main.5cac6faf.js.map",
+    "453.b4f80cb9.chunk.js.map": "/DeacData/static/js/453.b4f80cb9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6b64b217.css",
-    "static/js/main.f9650e85.js"
+    "static/js/main.5cac6faf.js"
   ]
 }
