@@ -1,27 +1,27 @@
-import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import {Dispatch, SetStateAction, useContext, useMemo} from 'react';
 import Select, {components} from 'react-select';
-import {gameData, group, seasonData} from '../types';
+import {gender, group} from '../types';
 import Switch from 'react-switch';
 import '../App.css';
-import {Lineup} from '../lineupClass';
-import {Filter, HeaderStyle} from '../styles/header';
+import {Toggles, HeaderStyle, ToggleButton} from '../styles/header';
+import {FirebaseContext} from './FirebaseProvider';
 
 interface iProps {
-  games: gameData[];
-  years: string[];
   selectedYear: string;
   selectedGame: number;
   selectedStat: string;
   finderActive: boolean;
   selectedGroup: string;
-  changeGroup: Dispatch<SetStateAction<group>>;
+  changeGroup: (group: group) => void;
   changeYear: (picked: string) => void;
-  changeGame: Dispatch<SetStateAction<number>>;
+  changeGame: (index: number) => void;
   changeStat: Dispatch<SetStateAction<string>>;
   changeShowFinder: Dispatch<SetStateAction<boolean>>;
   changeFinderActive: () => void;
   filter: boolean;
   setFilter: Dispatch<SetStateAction<boolean>>;
+  gender: gender;
+  setGender: (gender:gender)=>void;
 }
 interface gameChoice {
   label: string;
@@ -61,7 +61,6 @@ const statOptions: statChoice[] = [
 const groupOptions: groupChoice[] = [
   {value: 'lineups', label: 'Lineups'},
   {value: 'players', label: 'Players'},
-  {value: 'yearly', label: 'Year to Year'},
 ];
 
 //custom control compononet for select
@@ -74,9 +73,22 @@ const Control = (props: any) => {
   );
 };
 
+const checkedIcon = (
+  <svg
+    height="100%"
+    width="100%"
+    viewBox="-2 -5 17 21"
+    style={{position: 'absolute', top: 0}}
+  >
+    <path
+      d="M11.264 0L5.26 6.004 2.103 2.847 0 4.95l5.26 5.26 8.108-8.107L11.264 0"
+      fill="#000000"
+      fillRule="evenodd"
+    />
+  </svg>
+);
+
 const Header = ({
-  games,
-  years,
   selectedGroup,
   selectedGame,
   selectedYear,
@@ -90,30 +102,24 @@ const Header = ({
   changeFinderActive,
   filter,
   setFilter,
+  gender,
+  setGender,
 }: iProps) => {
-  const [gameOptions, setGameOptions] = useState<gameChoice[]>([]);
-  const [yearOptions, setyearOptions] = useState<yearChoice[]>([]);
-  useEffect(() => {
-    const gameOptions: gameChoice[] = [
-      {label: 'Season Total', value: -2},
-      {label: 'ACC Total', value: -1},
-      ...games.map((x) => ({label: x.game.replace(/_/g, ' '), value: x.order})),
-    ];
-    setGameOptions(gameOptions);
-  }, [games]);
-  useEffect(() => {
-    const yearOptions: yearChoice[] = years
-      .map((year) => ({
+  const years = useContext(FirebaseContext).years[gender];
+  const data = useContext(FirebaseContext).store.data[gender][selectedYear];
+  const gameOptions: gameChoice[] = useMemo(
+    () => data.map((x, i) => ({label: x.game, value: i})),
+    [data]
+  );
+
+  const yearOptions: yearChoice[] = useMemo(
+    () =>
+      years.map((year) => ({
         label: year,
         value: year,
-      }))
-      .sort((a, b) => {
-        const yearA = +a.value.slice(0, 4);
-        const yearB = +b.value.slice(0, 4);
-        return yearB - yearA;
-      });
-    setyearOptions(yearOptions);
-  }, [years]);
+      })),
+    [years]
+  );
   return (
     <div style={{paddingBottom: '10px'}}>
       <HeaderStyle>
@@ -132,7 +138,7 @@ const Header = ({
               getOptionValue={(option) => option.value}
               className="select year"
               isSearchable={false}
-              isDisabled={finderActive || selectedGroup === 'yearly'}
+              isDisabled={finderActive}
               styles={{
                 control: (provided) => ({...provided, padding: '5px 0px'}),
                 valueContainer: (provided) => ({
@@ -165,15 +171,13 @@ const Header = ({
           )}
           {!finderActive && (
             <div className="gameInfo">
-              {selectedGame === -2 ? (
-                <div className="totals">Season Total</div>
-              ) : selectedGame === -1 ? (
-                <div className="totals">ACC Total</div>
+              {selectedGame < 10 ? (
+                <div className="totals">{data[selectedGame].game}</div>
               ) : (
                 <div className="score">
-                  <div>Wake Forest: {games[selectedGame].score.wake}</div>
+                  <div>Wake Forest: {data[selectedGame].score.wake}</div>
                   <div>
-                    {games[selectedGame].game}: {games[selectedGame].score.opp}
+                    {data[selectedGame].game}: {data[selectedGame].score.opp}
                   </div>
                 </div>
               )}
@@ -192,7 +196,6 @@ const Header = ({
               className="game select"
               isSearchable={false}
               isClearable={false}
-              isDisabled={finderActive}
               getOptionLabel={(option) => option.label}
               getOptionValue={(option) => option.value.toFixed()}
               styles={{
@@ -264,17 +267,55 @@ const Header = ({
           </div>
         </div>
       </HeaderStyle>
-      <Filter>
-        <label style={{margin: '0px 5px'}}>Poss Limit</label>
-        <Switch
-          checked={filter}
-          onChange={(checked) => setFilter(checked)}
-          height={20}
-          width={35}
-          handleDiameter={18}
-          disabled={selectedGame >= 0}
-        />
-      </Filter>
+      <Toggles>
+        <ToggleButton>
+          <label style={{margin: '0px 5px'}}>Poss Limit</label>
+          <Switch
+            checked={filter}
+            checkedIcon = {checkedIcon}
+            onChange={(checked) => setFilter(checked)}
+            height={20}
+            width={40}
+            handleDiameter={18}
+            disabled={selectedGame >= 10}
+            borderRadius={6}
+            onColor="#cfb53b"
+            offColor="#474747"
+          />
+        </ToggleButton>
+        <ToggleButton>
+          <label
+            style={{
+              margin: '0px 5px',
+              color: gender === 'men' ? 'white' : '#474747',
+              fontWeight: 'bold',
+            }}
+          >
+            Men
+          </label>
+          <Switch
+            checked={gender === 'women'}
+            onChange={(checked) => setGender(checked ? 'women' : 'men')}
+            onColor="#cfb53b"
+            offColor="#cfb53b"
+            height={20}
+            width={35}
+            handleDiameter={18}
+            checkedIcon={false}
+            uncheckedIcon={false}
+            borderRadius={6}
+          />
+          <label
+            style={{
+              margin: '0px 5px',
+              color: gender === 'women' ? 'white' : '#5b5b5b',
+              fontWeight: 'bold',
+            }}
+          >
+            Women
+          </label>
+        </ToggleButton>
+      </Toggles>
     </div>
   );
 };

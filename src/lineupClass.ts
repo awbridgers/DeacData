@@ -1,4 +1,33 @@
 import {player} from './types';
+const emptyData = {
+    pointsFor: 0,
+    players: '',
+    pointsAgainst: 0,
+    dRebFor: 0,
+    dRebAgainst: 0,
+    oRebFor: 0,
+    oRebAgainst: 0,
+    madeTwosFor: 0,
+    attemptedTwosFor: 0,
+    madeTwosAgainst: 0,
+    attemptedTwosAgainst: 0,
+    madeThreesFor: 0,
+    madeThreesAgainst: 0,
+    attemptedThreesFor: 0,
+    attemptedThreesAgainst: 0,
+    paintFor: 0,
+    paintAgainst: 0,
+    secondFor: 0,
+    secondAgainst: 0,
+    turnoversFor: 0,
+    turnoversAgainst: 0,
+    assistsFor: 0,
+    assistsAgainst: 0,
+    ftaFor: 0,
+    ftaAgainst: 0,
+    time: 0,
+}
+export type dbData = typeof emptyData;
 
 export class Lineup {
   players: string;
@@ -27,33 +56,33 @@ export class Lineup {
   paintAgainst: number;
   secondFor: number;
   secondAgainst: number;
-  constructor(players: string) {
+  constructor(players: string, data = {...emptyData}) {
     this.players = players;
-    this.pointsFor = 0;
-    this.pointsAgainst = 0;
-    this.dRebFor = 0;
-    this.dRebAgainst = 0;
-    this.oRebFor = 0;
-    this.oRebAgainst = 0;
-    this.madeTwosFor = 0;
-    this.attemptedTwosFor = 0;
-    this.madeTwosAgainst = 0;
-    this.attemptedTwosAgainst = 0;
-    this.madeThreesFor = 0;
-    this.madeThreesAgainst = 0;
-    this.attemptedThreesFor = 0;
-    this.attemptedThreesAgainst = 0;
-    this.paintFor = 0;
-    this.paintAgainst = 0;
-    this.secondFor = 0;
-    this.secondAgainst = 0;
-    this.turnoversFor = 0;
-    this.turnoversAgainst = 0;
-    this.assistsFor = 0;
-    this.assistsAgainst = 0;
-    this.ftaFor = 0;
-    this.ftaAgainst = 0;
-    this.time = 0;
+    this.pointsFor = data.pointsFor;
+    this.pointsAgainst = data.pointsAgainst;
+    this.dRebFor = data.dRebFor;
+    this.dRebAgainst = data.dRebAgainst;
+    this.oRebFor = data.oRebFor;
+    this.oRebAgainst = data.oRebAgainst;
+    this.madeTwosFor = data.madeTwosFor;
+    this.attemptedTwosFor = data.attemptedTwosFor;
+    this.madeTwosAgainst = data.madeTwosAgainst;
+    this.attemptedTwosAgainst = data.attemptedTwosAgainst;
+    this.madeThreesFor = data.madeThreesFor;
+    this.madeThreesAgainst = data.madeThreesAgainst;
+    this.attemptedThreesFor = data.attemptedThreesFor;
+    this.attemptedThreesAgainst = data.attemptedThreesAgainst;
+    this.paintFor = data.paintFor;
+    this.paintAgainst = data.paintAgainst;
+    this.secondFor = data.secondFor;
+    this.secondAgainst = data.secondAgainst;
+    this.turnoversFor = data.turnoversFor;
+    this.turnoversAgainst = data.turnoversAgainst;
+    this.assistsFor = data.assistsFor;
+    this.assistsAgainst = data.assistsAgainst;
+    this.ftaFor = data.ftaFor;
+    this.ftaAgainst = data.ftaAgainst;
+    this.time = data.time;
   }
   combineLineup = (other: Lineup) => {
     const keys = Object.keys(other) as Array<keyof Lineup>;

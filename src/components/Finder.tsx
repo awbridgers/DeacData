@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
-import {finderPlayer, player} from '../types';
+import {finderPlayer, gender, player} from '../types';
 import Select, {CSSObjectWithLabel} from 'react-select';
 import {FirebaseContext} from './FirebaseProvider';
 
@@ -12,6 +12,7 @@ interface FinderProps {
   changePlayers: Dispatch<SetStateAction<finderPlayer[]>>;
   cancel: ()=>void;
   submit: ()=>void;
+  gender: gender;
 }
 interface Options {
   value: string;
@@ -47,21 +48,15 @@ const customStyle = {
   }),
 };
 
-const Finder = ({year, players, changePlayers, cancel,submit}: FinderProps) => {
+const Finder = ({year, players, changePlayers, cancel,submit, gender}: FinderProps) => {
+ 
+  const data = useContext(FirebaseContext).store.data[gender][year][0];
   const [roster, setRoster] = useState<Options[]>([]);
-  const data = useContext(FirebaseContext);
 
-  useEffect(() => {
-    //get the roster from the list of player data
-    if (data) {
-      setRoster(
-        data[year].season.players.sort((a,b)=>b.time - a.time).map((x) => ({
-          label: x.players,
-          value: x.players,
-        }))
-      );
-    }
-  }, [year]);
+
+  useEffect(()=>{
+    setRoster(Object.values(data.players).map(x=>({value:x.players, label:x.players})))
+  },[data])
 
   return (
     <Styles>
