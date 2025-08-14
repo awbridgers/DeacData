@@ -1,6 +1,6 @@
 {
-  "name": "lineup-data-viewer",
-  "homepage": "https://awbridgers.github.io/lineup-data-viewer",
+  "name": "deac-data",
+  "homepage": "https://awbridgers.github.io/DeacData",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

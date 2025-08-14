@@ -1,8 +1,8 @@
-# Lineup Data Viewer
+# Deac Data
 
 A convenient way to view lineup data from the Wake Forest Basketball team. Its like BBallRef, but for lineups.
 
-Site is live [here](https://awbridgers.github.io/lineup-data-viewer/).
+Site is live [here](https://awbridgers.github.io/DeacData/).
 
 ![Home Page](./homePage.png)
 
@@ -11,10 +11,10 @@ Site is live [here](https://awbridgers.github.io/lineup-data-viewer/).
 ## Features
 ### Data
 The viewer has the ability to show several types of data, from raw totals for Wake and their opponent to more advanced analytics.
-* Use the `Season` dropdown to change the year.
-* The `Game` dropdown allows the user to filter by the whole season, conference games, or individual games.
+* Use the `Season` dropdown to change the year. Select `Yearly` to see aggregate totals from each season.
+* The `Game` dropdown allows the user to filter by total, conference or non-conference, game location, quad, or individual games.
 * The `Stat Type` dropdown filters by raw data, net +/-, advanced per possession data, and shooting data.
-* The `Group` dropdown switches between lineups, individual players, and year-to-year. The individiual stats are stats for the TEAM while that player is on the court. The year-to-year data is the team as a whole for an entire season.
+* The `Group` dropdown switches between lineups and individual players. The individiual stats are stats for the TEAM while that player is on the court..
 * The `Poss Limit` switch will filter out any lineups that didn't meet the possession requirement of 1 possession per game.
 ### Lineup Finder
 <img src = './lineupFinder.png' width = 300>
