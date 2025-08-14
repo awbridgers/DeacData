@@ -29,7 +29,7 @@ Hit the `Search Lineups` button on the left side of the control panel to open th
 ### Player Report
 <img src = './playerReport.png' width = 300>
 
-To quickly see how a player impacts the team when they are on the court, click the `Report` link available in the header of the Total Stats page. This will show how the team faired in several key analytics with that player on the court vs on the bench. You can select `ACC Play Only` to see stats only from conference play.
+To quickly see how a player impacts the team when they are on the court, click the `Report` link available in the header of the Total Stats page. This will show how the team faired in several key analytics with that player on the court vs on the bench. Use the second drop down to select a game type (total, conference, non-conference, home, away, neutral, quads).
 ### Download
 The `Download` button on the Total Stats page will download a copy of the raw data in a excel spreadsheet format. 
 ## Author 
