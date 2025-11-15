@@ -131,7 +131,7 @@ export const TableStyle = styled.div`
         font-size: 11px;
       }
       .th {
-        font-size: 13px;
+        font-size: 12px;
       }
     }
     .net,
