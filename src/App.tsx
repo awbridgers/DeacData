@@ -1,4 +1,4 @@
-import {useContext, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import './App.css';
 import {Lineup} from './lineupClass';
 import {finderPlayer, gender, group} from './types';
@@ -40,7 +40,9 @@ const App = () => {
     useState<finderPlayer[]>(defaultFinder);
   //const prevGame = useRef<number>(0);
   //const prevGroup = useRef<group>('lineups');
-
+  useEffect(()=>{
+    console.log(displayData);
+  },[selectedStat])
   //change the year
   const changeYear = async (year: string) => {
     //if the selected game is outside of the 9 standard for all years,

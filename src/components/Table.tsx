@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo} from 'react';
 import {Lineup} from '../lineupClass';
 import {total, net, advanced, shooting, csvHeaders} from '../util/tableSetup';
 import {
@@ -60,7 +60,7 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     prepareRow,
     footerGroups,
   } = useTable(
-    {columns: tableColumns, data: tableData, defaultColumn},
+    {columns: tableColumns, data: tableData, defaultColumn, autoResetExpanded: false, autoResetSortBy: false },
     useSortBy,
     useFlexLayout,
     useSticky
