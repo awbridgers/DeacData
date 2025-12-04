@@ -41,7 +41,7 @@ const App = () => {
   //const prevGame = useRef<number>(0);
   //const prevGroup = useRef<group>('lineups');
   useEffect(()=>{
-    console.log(displayData);
+    //console.log(displayData);
   },[selectedStat])
   //change the year
   const changeYear = async (year: string) => {

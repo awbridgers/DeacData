@@ -10,34 +10,38 @@ interface SortProps {
   desc: boolean;
 }
 
-const format = new Intl.NumberFormat('en-us', {signDisplay: 'always', maximumFractionDigits:2});
+const format = new Intl.NumberFormat('en-us', {
+  signDisplay: 'always',
+  maximumFractionDigits: 2,
+});
 const sortNumbers = (
   rowA: Row<Lineup>,
   rowB: Row<Lineup>,
   id: string,
-  desc?:boolean
+  desc?: boolean
 ): number => {
   const isDesc = desc ? desc : false;
   //console.log(isDesc)
   const a = +rowA.values[id];
   const b = +rowB.values[id];
-    //take care of dividing by 0 for percentages
-    //always keep NaN's at bottom of list
-    if(isNaN(a) && isNaN(b)){
-      return 0
-    }
-    if(isNaN(a)){
-      return isDesc ? -1 : 999
-    }
-    if(isNaN(b)){
-      return isDesc ? 1 : -999
-    }
+  //take care of dividing by 0 for percentages
+  //always keep NaN's at bottom of list
+  if (isNaN(a) && isNaN(b)) {
+    return 0;
+  }
+  if (isNaN(a)) {
+    return isDesc ? -1 : 999;
+  }
+  if (isNaN(b)) {
+    return isDesc ? 1 : -999;
+  }
   return a > b ? 1 : a < b ? -1 : 0;
 };
 
-export const total = (isMobile: boolean): Array<Column<Lineup>> => [
+export const getColumns = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
+    id: 'totalLineup',
     accessor: 'players',
     Cell: ({value}) => <>{value.replace(/\\/g, '\n')}</>,
     className: 'pre',
@@ -53,6 +57,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Time',
+    id: 'totalTime',
     accessor: 'time',
     Cell: ({value}) => <>{fixTime(value)}</>,
     width: isMobile ? 25 : 50,
@@ -61,7 +66,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
     Footer: (info) => {
       const total = useMemo(
         () =>
-          info.rows.reduce((prev, current) => prev + current.values.time, 0),
+          info.rows.reduce((prev, current) => prev +  current.original.time, 0),
         [info.rows]
       );
       return <>{fixTime(total)}</>;
@@ -69,12 +74,14 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Team',
+    id:'totalTeamFor',
     sortDescFirst: true,
     sortType: sortNumbers,
     Footer: () => null,
     columns: [
       {
         Header: 'Pts',
+        id:'totalPtsFor',
         accessor: 'pointsFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -82,7 +89,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.pointsFor,
+                (prev, current) => prev +  current.original.pointsFor,
                 0
               ),
             [info.rows]
@@ -92,6 +99,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'DRb',
+        id:'totalDRbFor',
         accessor: 'dRebFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -99,7 +107,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.dRebFor,
+                (prev, current) => prev +  current.original.dRebFor,
                 0
               ),
             [info.rows]
@@ -109,6 +117,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'ORb',
+        id:'totalORbFor',
         accessor: 'oRebFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -116,7 +125,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.oRebFor,
+                (prev, current) => prev +  current.original.oRebFor,
                 0
               ),
             [info.rows]
@@ -126,15 +135,15 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGM',
+        id:'totalFGMFor',
         accessor: (row) => row.totalShots.madeFor,
-        id: 'madeFor',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeFor,
+                (prev, current) => prev +  current.original.totalShots.madeFor,
                 0
               ),
             [info.rows]
@@ -144,15 +153,15 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGA',
+        id:'totalFGAFor',
         accessor: (row) => row.totalShots.attemptedFor,
-        id: 'attemptedFor',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedFor,
+                (prev, current) => prev +  current.original.totalShots.attemptedFor,
                 0
               ),
             [info.rows]
@@ -162,6 +171,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PM',
+        id:'total2PMFor',
         accessor: 'madeTwosFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -169,7 +179,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeTwosFor,
+                (prev, current) => prev +  current.original.madeTwosFor,
                 0
               ),
             [info.rows]
@@ -179,6 +189,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PA',
+        id:'total2PAFor',
         accessor: 'attemptedTwosFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -186,7 +197,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedTwosFor,
+                (prev, current) => prev +  current.original.attemptedTwosFor,
                 0
               ),
             [info.rows]
@@ -197,6 +208,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: '3PM',
+        id:'total3PMFor',
         accessor: 'madeThreesFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -204,7 +216,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeThreesFor,
+                (prev, current) => prev +  current.original.madeThreesFor,
                 0
               ),
             [info.rows]
@@ -214,6 +226,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PA',
+        id:'total3PAFor',
         accessor: 'attemptedThreesFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -221,7 +234,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedThreesFor,
+                (prev, current) => prev +  current.original.attemptedThreesFor,
                 0
               ),
             [info.rows]
@@ -229,25 +242,10 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           return <>{total}</>;
         },
       },
-      // {
-      //   Header: '3P%',
-      //   accessor: 'threePercentFor',
-      //   sortDescFirst: true, sortType: sortNumbers,
-      //   Cell: ({value}) => <>{value.toFixed(2)}</>,
-      //   Footer: (info) => {
-      //     const total = useMemo(
-      //       () =>
-      //         info.rows.reduce(
-      //           (prev, current) => prev + current.values.attemptedTwosFor,
-      //           0
-      //         ),
-      //       [info.rows]
-      //     );
-      //     return <>{total}</>;
-      //   },
-      // },
+
       {
         Header: 'Pnt',
+        id:'totalPntFor',
         accessor: 'paintFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -255,7 +253,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.paintFor,
+                (prev, current) => prev +  current.original.paintFor,
                 0
               ),
             [info.rows]
@@ -265,6 +263,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2nd',
+        id:'total2ndFor',
         accessor: 'secondFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -272,7 +271,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.secondFor,
+                (prev, current) => prev +  current.original.secondFor,
                 0
               ),
             [info.rows]
@@ -282,6 +281,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'Ast',
+        id:'totalAstFor',
         accessor: 'assistsFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -289,7 +289,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.assistsFor,
+                (prev, current) => prev +  current.original.assistsFor,
                 0
               ),
             [info.rows]
@@ -299,6 +299,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'TO',
+        id:'totalTOFor',
         accessor: 'turnoversFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -306,7 +307,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.turnoversFor,
+                (prev, current) => prev +  current.original.turnoversFor,
                 0
               ),
             [info.rows]
@@ -318,12 +319,14 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Opponent',
+    id: 'totalOpponent',
     sortDescFirst: true,
     sortType: sortNumbers,
     Footer: () => null,
     columns: [
       {
         Header: 'Pts',
+        id:'totalPtsAgainst',
         accessor: 'pointsAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -331,7 +334,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.pointsAgainst,
+                (prev, current) => prev +  current.original.pointsAgainst,
                 0
               ),
             [info.rows]
@@ -342,6 +345,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: 'DRb',
+        id:'totalDRbAgainst',
         accessor: 'dRebAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -349,7 +353,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.dRebAgainst,
+                (prev, current) => prev +  current.original.dRebAgainst,
                 0
               ),
             [info.rows]
@@ -359,6 +363,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'ORb',
+        id:'totalORbAgainst',
         accessor: 'oRebAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -366,7 +371,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.oRebAgainst,
+                (prev, current) => prev +  current.original.oRebAgainst,
                 0
               ),
             [info.rows]
@@ -376,15 +381,15 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGM',
+        id:'totalFGMAgainst',
         accessor: (row) => row.totalShots.madeAgainst,
-        id: 'madeAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeAgainst,
+                (prev, current) => prev +  current.original.totalShots.madeAgainst,
                 0
               ),
             [info.rows]
@@ -394,15 +399,15 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGA',
+        id:'totalFGAAgainst',
         accessor: (row) => row.totalShots.attemptedAgainst,
-        id: 'attemptedAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedAgainst,
+                (prev, current) => prev +  current.original.totalShots.attemptedAgainst,
                 0
               ),
             [info.rows]
@@ -412,6 +417,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PM',
+        id:'total2PMAgainst',
         accessor: 'madeTwosAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -419,7 +425,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeTwosAgainst,
+                (prev, current) => prev +  current.original.madeTwosAgainst,
                 0
               ),
             [info.rows]
@@ -429,6 +435,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PA',
+        id:'total2PAAgainst',
         accessor: 'attemptedTwosAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -436,7 +443,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedTwosAgainst,
+                (prev, current) => prev +  current.original.attemptedTwosAgainst,
                 0
               ),
             [info.rows]
@@ -444,25 +451,9 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           return <>{total}</>;
         },
       },
-      // {
-      //   Header: '2P%',
-      //   accessor: 'twoPercentAgainst',
-      //   sortDescFirst: true, sortType: sortNumbers,
-      //   Cell: ({value}) => <>{value.toFixed(2)}</>,
-      //   Footer: (info) => {
-      //     const total = useMemo(
-      //       () =>
-      //         info.rows.reduce(
-      //           (prev, current) => prev + current.values.attemptedTwosFor,
-      //           0
-      //         ),
-      //       [info.rows]
-      //     );
-      //     return <>{total}</>;
-      //   },
-      // },
       {
         Header: '3PM',
+        id:'total3PMAgainst',
         accessor: 'madeThreesAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -470,7 +461,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeThreesAgainst,
+                (prev, current) => prev +  current.original.madeThreesAgainst,
                 0
               ),
             [info.rows]
@@ -480,6 +471,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PA',
+        id:'total3PAAgainst',
         accessor: 'attemptedThreesAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -487,7 +479,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedThreesAgainst,
+                (prev, current) => prev +  current.original.attemptedThreesAgainst,
                 0
               ),
             [info.rows]
@@ -495,26 +487,10 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           return <>{total}</>;
         },
       },
-      // {
-      //   Header: '3P%',
-      //   accessor: 'threePercentAgainst',
-      //   sortDescFirst: true, sortType: sortNumbers,
-      //   Cell: ({value}) => <>{value.toFixed(2)}</>,
-      //   Footer: (info) => {
-      //     const total = useMemo(
-      //       () =>
-      //         info.rows.reduce(
-      //           (prev, current) => prev + current.values.attemptedTwosFor,
-      //           0
-      //         ),
-      //       [info.rows]
-      //     );
-      //     return <>{total}</>;
-      //   },
-      // },
 
       {
         Header: 'Pnt',
+        id:'totalPntAgainst',
         accessor: 'paintAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -522,7 +498,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.paintAgainst,
+                (prev, current) => prev +  current.original.paintAgainst,
                 0
               ),
             [info.rows]
@@ -533,6 +509,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: '2nd',
+        id:'total2ndAgainst',
         accessor: 'secondAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -540,7 +517,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.secondAgainst,
+                (prev, current) => prev +  current.original.secondAgainst,
                 0
               ),
             [info.rows]
@@ -551,6 +528,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: 'Ast',
+        id:'totalAstAgainst',
         accessor: 'assistsAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -558,7 +536,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.assistsAgainst,
+                (prev, current) => prev +  current.original.assistsAgainst,
                 0
               ),
             [info.rows]
@@ -569,6 +547,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: 'TO',
+        id:'totalTOAgainst',
         accessor: 'turnoversAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -576,7 +555,7 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.turnoversAgainst,
+                (prev, current) => prev +  current.original.turnoversAgainst,
                 0
               ),
             [info.rows]
@@ -586,11 +565,9 @@ export const total = (isMobile: boolean): Array<Column<Lineup>> => [
       },
     ],
   },
-];
-
-export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
+    id: 'netLineup',
     accessor: 'players',
     Cell: ({value}) => <>{value.replace(/\\/g, '\n')}</>,
     className: 'pre',
@@ -606,6 +583,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Time',
+    id: 'netTime',
     accessor: 'time',
     Cell: ({value}) => <>{fixTime(value)}</>,
     width: isMobile ? 20 : 60,
@@ -614,7 +592,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
     Footer: (info) => {
       const total = useMemo(
         () =>
-          info.rows.reduce((prev, current) => prev + current.values.time, 0),
+          info.rows.reduce((prev, current) => prev +  current.original.time, 0),
         [info.rows]
       );
       return <>{fixTime(total)}</>;
@@ -622,6 +600,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Pts',
+    id: 'netPts',
     accessor: 'netPoints',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -630,7 +609,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netPoints,
+            (prev, current) => prev +  current.original.netPoints,
             0
           ),
         [info.rows]
@@ -640,6 +619,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'DRb',
+    id: 'netDRb',
     accessor: 'netDRebounds',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -649,7 +629,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netDRebounds,
+            (prev, current) => prev +  current.original.netDRebounds,
             0
           ),
         [info.rows]
@@ -659,6 +639,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'ORb',
+    id: 'netORb',
     accessor: 'netORebounds',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -668,7 +649,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netORebounds,
+            (prev, current) => prev +  current.original.netORebounds,
             0
           ),
         [info.rows]
@@ -678,6 +659,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: '2PM',
+    id: 'net2PM',
     accessor: 'netMadeTwos',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -687,7 +669,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netMadeTwos,
+            (prev, current) => prev +  current.original.netMadeTwos,
             0
           ),
         [info.rows]
@@ -697,6 +679,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: '2PA',
+    id: 'net2PA',
     accessor: 'netAttemptedTwos',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -706,7 +689,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netAttemptedTwos,
+            (prev, current) => prev +  current.original.netAttemptedTwos,
             0
           ),
         [info.rows]
@@ -716,6 +699,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: '3PM',
+    id: 'net3PM',
     accessor: 'netMadeThrees',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -725,7 +709,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netMadeThrees,
+            (prev, current) => prev +  current.original.netMadeThrees,
             0
           ),
         [info.rows]
@@ -735,6 +719,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: '3PA',
+    id: 'net3PA',
     accessor: 'netAttemptedThrees',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -744,7 +729,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netAttemptedThrees,
+            (prev, current) => prev +  current.original.netAttemptedThrees,
             0
           ),
         [info.rows]
@@ -754,6 +739,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Pnt',
+    id: 'netPnt',
     accessor: 'netPaint',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -763,7 +749,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netPaint,
+            (prev, current) => prev +  current.original.netPaint,
             0
           ),
         [info.rows]
@@ -773,6 +759,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: '2nd',
+    id: 'net2nd',
     accessor: 'netSecond',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -782,7 +769,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netSecond,
+            (prev, current) => prev +  current.original.netSecond,
             0
           ),
         [info.rows]
@@ -792,6 +779,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Ast',
+    id: 'netAst',
     accessor: 'netAssists',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -801,7 +789,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netAssists,
+            (prev, current) => prev +  current.original.netAssists,
             0
           ),
         [info.rows]
@@ -811,6 +799,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'TO',
+    id: 'netTO',
     accessor: 'netTurnovers',
     Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
@@ -820,7 +809,7 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       const total = useMemo(
         () =>
           info.rows.reduce(
-            (prev, current) => prev + current.values.netTurnovers,
+            (prev, current) => prev +  current.original.netTurnovers,
             0
           ),
         [info.rows]
@@ -828,11 +817,9 @@ export const net = (isMobile: boolean): Array<Column<Lineup>> => [
       return <>{format.format(total)}</>;
     },
   },
-];
-
-export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
+    id: 'advancedLineup',
     accessor: 'players',
     Cell: ({value}) => <>{value.replace(/\\/g, '\n')}</>,
     className: 'pre',
@@ -848,8 +835,9 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Poss',
+    id: 'advancedPoss',
     accessor: 'possessions',
-    Cell: ({value})=><>{Math.round(value)}</>,
+    Cell: ({value}) => <>{Math.round(value)}</>,
     sortDescFirst: true,
     sortType: sortNumbers,
     Footer: (info) => {
@@ -866,8 +854,9 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'O RTG',
+    id: 'advancedO RTG',
     accessor: 'oRating',
-    Cell:({value})=><>{value.toFixed(2)}</>,
+    Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: true,
     sortType: sortNumbers,
     Footer: (info) => {
@@ -887,8 +876,9 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'D RTG',
+    id: 'advancedD RTG',
     accessor: 'dRating',
-    Cell: ({value})=><>{value.toFixed(2)}</>,
+    Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: false,
     sortType: sortNumbers,
     Footer: (info) => {
@@ -905,10 +895,12 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
       }, [info.rows]);
       return <>{total.toFixed(2)}</>;
     },
-  },{
+  },
+  {
     Header: 'Net RTG',
+    id: 'advancedNet RTG',
     accessor: 'netRating',
-    Cell: ({value})=><>{format.format(value)}</>,
+    Cell: ({value}) => <>{format.format(value)}</>,
     sortDescFirst: true,
     sortType: sortNumbers,
     Footer: (info) => {
@@ -929,10 +921,9 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
           (prev, current) => prev + current.original.pointsAgainst,
           0
         );
-        const oRating = pointsFor/possFor * 100
-        const dRating = pointsAgainst/possAgainst * 100;
-        return (oRating - dRating);
-       
+        const oRating = (pointsFor / possFor) * 100;
+        const dRating = (pointsAgainst / possAgainst) * 100;
+        return oRating - dRating;
       }, [info.rows]);
       return <>{format.format(total)}</>;
     },
@@ -940,6 +931,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
 
   {
     Header: 'ORB%',
+    id: 'advancedORB%',
     accessor: 'oRebPercent',
     disableSortBy: false,
     Cell: ({value}) => <>{value.toFixed(2)}</>,
@@ -962,6 +954,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'DRB%',
+    id: 'advancedDRB%',
     accessor: 'dRebPercent',
     disableSortBy: false,
     Cell: ({value}) => <>{value.toFixed(2)}</>,
@@ -985,6 +978,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
 
   {
     Header: 'AST %',
+    id: 'advancedAST %',
     accessor: 'assistPerFG',
     Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: true,
@@ -1006,6 +1000,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'A/P',
+    id: 'advancedA/P',
     accessor: 'assistsPerPoss',
     Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: true,
@@ -1027,6 +1022,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'A/TO',
+    id: 'advancedA/TO',
     accessor: 'assistTurnoverRatio',
     Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: true,
@@ -1048,6 +1044,7 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'TO/P',
+    id: 'advancedTO/P',
     accessor: 'turnoversPerPoss',
     Cell: ({value}) => <>{value.toFixed(2)}</>,
     sortDescFirst: true,
@@ -1067,11 +1064,9 @@ export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
       return <>{total.toFixed(2)}</>;
     },
   },
-];
-
-export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
+    id: 'shootingLineup',
     accessor: 'players',
     Cell: ({value}) => <>{value.replace(/\\/g, '\n')}</>,
     className: 'pre',
@@ -1087,18 +1082,19 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Team',
+    id: 'shootingTeam',
     columns: [
       {
         Header: 'FGM',
+        id:'shootingFGMFor',
         accessor: (row) => row.totalShots.madeFor,
-        id: 'madeFor',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeFor,
+                (prev, current) => prev +  current.original.totalShots.madeFor,
                 0
               ),
             [info.rows]
@@ -1108,15 +1104,15 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGA',
+        id:'shootingFGAFor',
         accessor: (row) => row.totalShots.attemptedFor,
-        id: 'attemptedFor',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedFor,
+                (prev, current) => prev +  current.original.totalShots.attemptedFor,
                 0
               ),
             [info.rows]
@@ -1127,6 +1123,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: 'FG%',
+        id:'shootingFG%For',
         accessor: 'fgPercentFor',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1149,15 +1146,15 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PM',
+        id:'shooting2PMFor',
         accessor: 'madeTwosFor',
-
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeTwosFor,
+                (prev, current) => prev +  current.original.madeTwosFor,
                 0
               ),
             [info.rows]
@@ -1167,6 +1164,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PA',
+        id:'shooting2PAFor',
         accessor: 'attemptedTwosFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1174,7 +1172,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedTwosFor,
+                (prev, current) => prev +  current.original.attemptedTwosFor,
                 0
               ),
             [info.rows]
@@ -1185,6 +1183,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: '2P%',
+        id:'shooting2P%For',
         accessor: 'twoPercentFor',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1206,6 +1205,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PM',
+        id:'shooting3PMFor',
         accessor: 'madeThreesFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1213,7 +1213,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeThreesFor,
+                (prev, current) => prev +  current.original.madeThreesFor,
                 0
               ),
             [info.rows]
@@ -1223,6 +1223,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PA',
+        id:'shooting3PAFor',
         accessor: 'attemptedThreesFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1230,7 +1231,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedThreesFor,
+                (prev, current) => prev +  current.original.attemptedThreesFor,
                 0
               ),
             [info.rows]
@@ -1240,6 +1241,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3P%',
+        id:'shooting3P%For',
         accessor: 'threePercentFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1261,6 +1263,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'eFG%',
+        id:'shootingeFG%For',
         accessor: 'eFGFor',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1287,6 +1290,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3AR',
+        id:'shooting3ARFor',
         accessor: 'threeARFor',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1311,18 +1315,19 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
   },
   {
     Header: 'Opponent',
+    id: 'shootingOpponent',
     columns: [
       {
         Header: 'FGM',
+        id:'shootingFGMAgainst',
         accessor: (row) => row.totalShots.madeAgainst,
-        id: 'madeAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeAgainst,
+                (prev, current) => prev +  current.original.totalShots.madeAgainst,
                 0
               ),
             [info.rows]
@@ -1332,15 +1337,15 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'FGA',
+        id:'shootingFGAAgainst',
         accessor: (row) => row.totalShots.attemptedAgainst,
-        id: 'attemptedAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
         Footer: (info) => {
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedAgainst,
+                (prev, current) => prev +  current.original.totalShots.attemptedAgainst,
                 0
               ),
             [info.rows]
@@ -1351,6 +1356,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: 'FG%',
+        id:'shootingFG%Against',
         accessor: 'fgPercentAgainst',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1373,6 +1379,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PM',
+        id:'shooting2PMAgainst',
         accessor: 'madeTwosAgainst',
 
         sortDescFirst: true,
@@ -1381,7 +1388,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeTwosAgainst,
+                (prev, current) => prev +  current.original.madeTwosAgainst,
                 0
               ),
             [info.rows]
@@ -1391,6 +1398,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '2PA',
+        id:'shooting2PAAgainst',
         accessor: 'attemptedTwosAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1398,7 +1406,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedTwosAgainst,
+                (prev, current) => prev +  current.original.attemptedTwosAgainst,
                 0
               ),
             [info.rows]
@@ -1409,6 +1417,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
 
       {
         Header: '2P%',
+        id:'shooting2P%Against',
         accessor: 'twoPercentAgainst',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1430,6 +1439,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PM',
+        id:'shooting3PMAgainst',
         accessor: 'madeThreesAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1437,7 +1447,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.madeThreesAgainst,
+                (prev, current) => prev +  current.original.madeThreesAgainst,
                 0
               ),
             [info.rows]
@@ -1447,6 +1457,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3PA',
+        id:'shooting3PAAgainst',
         accessor: 'attemptedThreesAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1454,7 +1465,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
           const total = useMemo(
             () =>
               info.rows.reduce(
-                (prev, current) => prev + current.values.attemptedThreesAgainst,
+                (prev, current) => prev +  current.original.attemptedThreesAgainst,
                 0
               ),
             [info.rows]
@@ -1464,6 +1475,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3P%',
+        id:'shooting3P%Against',
         accessor: 'threePercentAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,
@@ -1485,6 +1497,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: 'eFG%',
+        id:'shootingeFG%Against',
         accessor: 'eFGAgainst',
         Cell: ({value}) => <>{value.toFixed(2)}</>,
         sortDescFirst: true,
@@ -1511,6 +1524,7 @@ export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
       },
       {
         Header: '3AR',
+        id:'shooting3ARAgainst',
         accessor: 'threeARAgainst',
         sortDescFirst: true,
         sortType: sortNumbers,

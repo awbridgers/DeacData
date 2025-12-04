@@ -1,12 +1,7 @@
-import {useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {Lineup} from '../lineupClass';
-import {total, net, advanced, shooting, csvHeaders} from '../util/tableSetup';
-import {
-  Column,
-  useTable,
-  useSortBy,
-  useFlexLayout,
-} from 'react-table';
+import {getColumns, csvHeaders} from '../util/tableSetup';
+import {Column, useTable, useSortBy, useFlexLayout} from 'react-table';
 import {CSVLink} from 'react-csv';
 import {TableStyle} from '../styles/table';
 import {useMediaQuery} from 'react-responsive';
@@ -29,20 +24,10 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
   );
   const isMobile = useMediaQuery({maxWidth: '767px'});
 
-  const tableColumns = useMemo<Column<Lineup>[]>(() => {
-    switch (type) {
-      case 'total':
-        return total(isMobile);
-      case 'net':
-        return net(isMobile);
-      case 'advanced':
-        return advanced(isMobile);
-      case 'shooting':
-        return shooting(isMobile);
-      default:
-        return total(isMobile);
-    }
-  }, [type, isMobile]);
+  const tableColumns = useMemo<Column<Lineup>[]>(
+    () => getColumns(isMobile),
+    [isMobile]
+  );
   const defaultColumn = useMemo(
     () => ({
       // When using the useFlexLayout:
@@ -59,17 +44,29 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     rows,
     prepareRow,
     footerGroups,
+    setHiddenColumns,
+    flatHeaders
   } = useTable(
-    {columns: tableColumns, data: tableData, defaultColumn, autoResetExpanded: false, autoResetSortBy: false },
+    {
+      columns: tableColumns,
+      data: tableData,
+      defaultColumn,
+      autoResetSortBy: false,
+    },
     useSortBy,
     useFlexLayout,
-    useSticky
+    useSticky,
   );
+  const columnList  = useRef<string[]>(flatHeaders.map(x=>x.id!))
+  useEffect(()=>{
+    setHiddenColumns(columnList.current.filter(x=>!x.includes(type)))
+  },[type, isMobile])
+  const fixedHeaderGroups = type === 'total' || type === 'shooting' ? headerGroups : [headerGroups[1]];
   return (
     <TableStyle>
       <div {...getTableProps()} className={`table sticky ${type}`}>
         <div className="thead">
-          {headerGroups.map((headerGroup) => {
+          {fixedHeaderGroups.map((headerGroup) => {
             const {key, ...props} = headerGroup.getHeaderGroupProps();
             return (
               <div key={key} {...props} className="tr">
@@ -104,7 +101,7 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
           })}
         </div>
         <div {...getTableBodyProps()} className="tbody">
-          {rows.map((row) => {     
+          {rows.map((row) => {
             prepareRow(row);
             const {key: rowKey, ...rowProps} = row.getRowProps();
             return (
