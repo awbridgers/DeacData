@@ -37,7 +37,7 @@ const sortNumbers = (
   return a > b ? 1 : a < b ? -1 : 0;
 };
 
-export const getCols = (isMobile: boolean): Array<Column<Lineup>> => [
+export const total = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
     id: 'totalPlayers',
@@ -568,6 +568,8 @@ export const getCols = (isMobile: boolean): Array<Column<Lineup>> => [
       },
     ],
   },
+];
+export const net = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
     id: 'netPlayers',
@@ -820,6 +822,8 @@ export const getCols = (isMobile: boolean): Array<Column<Lineup>> => [
       return <>{format.format(total)}</>;
     },
   },
+];
+export const advanced = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
     id: 'advancedPlayers',
@@ -1067,6 +1071,8 @@ export const getCols = (isMobile: boolean): Array<Column<Lineup>> => [
       return <>{total.toFixed(2)}</>;
     },
   },
+];
+export const shooting = (isMobile: boolean): Array<Column<Lineup>> => [
   {
     Header: 'Lineup',
     id: 'shootingPlayers',
@@ -1554,6 +1560,88 @@ export const getCols = (isMobile: boolean): Array<Column<Lineup>> => [
       },
     ],
   },
+];
+
+export const headerList = [
+  'totalPlayers',
+  'totalTime',
+  'totalTeamFor',
+  'totalPointsFor',
+  'totalDRebFor',
+  'totalORebFor',
+  'totalMadeFor',
+  'totalAttemptedFor',
+  'totalMadeTwosFor',
+  'totalAttemptedTwosFor',
+  'totalMadeThreesFor',
+  'totalAttemptedThreesFor',
+  'totalPaintFor',
+  'totalSecondFor',
+  'totalAssistsFor',
+  'totalTurnoversFor',
+  'totalOpponent',
+  'totalPointsAgainst',
+  'totalDRebAgainst',
+  'totalORebAgainst',
+  'totalMadeAgainst',
+  'totalAttemptedAgainst',
+  'totalMadeTwosAgainst',
+  'totalAttemptedTwosAgainst',
+  'totalMadeThreesAgainst',
+  'totalAttemptedThreesAgainst',
+  'totalPaintAgainst',
+  'totalSecondAgainst',
+  'totalAssistsAgainst',
+  'totalTurnoversAgainst',
+  'netPlayers',
+  'netTime',
+  'netPoints',
+  'netDRebounds',
+  'netORebounds',
+  'netMadeTwos',
+  'netAttemptedTwos',
+  'netMadeThrees',
+  'netAttemptedThrees',
+  'netPaint',
+  'netSecond',
+  'netAssists',
+  'netTurnovers',
+  'advancedPlayers',
+  'advancedPossessions',
+  'advancedORating',
+  'advancedDRating',
+  'advancedNetRating',
+  'advancedORebPercent',
+  'advancedDRebPercent',
+  'advancedAssistPerFG',
+  'advancedAssistsPerPoss',
+  'advancedAssistTurnoverRatio',
+  'advancedTurnoverPerPoss',
+  'shootingPlayers',
+  'shootingTeam',
+  'shootingMadeFor',
+  'shootingAttemptedFor',
+  'shootingFgPercentFor',
+  'shootingMadeTwosFor',
+  'shootingAttemptedTwosFor',
+  'shootingTwoPercentFor',
+  'shootingMadeThreesFor',
+  'shootingAttemptedThreesFor',
+  'shootingThreePercentFor',
+  'shootingEFGFor',
+  'shootingThreeARFor',
+  'shootingOpponent',
+  'shootingMadeAgainst',
+  'shootingAttemptedAgainst',
+  'shootingFgPercentAgainst',
+  'shootingMadeTwosAgainst',
+  'shootingAttemptedTwosAgainst',
+  'shootingTwoPercentAgainst',
+  'shootingMadeThreesAgainst',
+  'shootingAttemptedThreesAgainst',
+  'shootingThreePercentAgainst',
+  'shootingEFGAgainst',
+  'shootingThreeARAgainst',
 ];
 
 export const csvHeaders = [
