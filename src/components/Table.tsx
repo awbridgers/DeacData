@@ -1,7 +1,12 @@
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {Lineup} from '../lineupClass';
-import {getColumns, csvHeaders} from '../util/tableSetup';
-import {Column, useTable, useSortBy, useFlexLayout} from 'react-table';
+import {getCols, csvHeaders} from '../util/tableSetup';
+import {
+  Column,
+  useTable,
+  useSortBy,
+  useFlexLayout,
+} from 'react-table';
 import {CSVLink} from 'react-csv';
 import {TableStyle} from '../styles/table';
 import {useMediaQuery} from 'react-responsive';
@@ -18,16 +23,15 @@ interface iProps {
 }
 
 const Table = ({data, type, onClick, filter, count}: iProps) => {
+  const [loading, setLoading] = useState<boolean>(true)
   const tableData = useMemo<Lineup[]>(
     () => data.filter((x) => x.possessions >= count || !filter),
     [data, count, filter]
   );
   const isMobile = useMediaQuery({maxWidth: '767px'});
-
-  const tableColumns = useMemo<Column<Lineup>[]>(
-    () => getColumns(isMobile),
-    [isMobile]
-  );
+  const tableColumns = useMemo<Column<Lineup>[]>(() => {
+    return getCols(isMobile)
+  }, [type, isMobile]);
   const defaultColumn = useMemo(
     () => ({
       // When using the useFlexLayout:
@@ -45,28 +49,24 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     prepareRow,
     footerGroups,
     setHiddenColumns,
-    flatHeaders
+    allColumns,
+    state
   } = useTable(
-    {
-      columns: tableColumns,
-      data: tableData,
-      defaultColumn,
-      autoResetSortBy: false,
-    },
+    {columns: tableColumns, data: tableData, defaultColumn},
     useSortBy,
     useFlexLayout,
-    useSticky,
+    useSticky
   );
-  const columnList  = useRef<string[]>(flatHeaders.map(x=>x.id!))
   useEffect(()=>{
-    setHiddenColumns(columnList.current.filter(x=>!x.includes(type)))
-  },[type, isMobile])
-  const fixedHeaderGroups = type === 'total' || type === 'shooting' ? headerGroups : [headerGroups[1]];
-  return (
+    setHiddenColumns((old)=>allColumns.filter(x=>!x.id.includes(type)).map(x=>x.id))
+    setLoading(false)
+  },[type])
+  console.log(state)
+  return (loading ? <>Loading</> :
     <TableStyle>
       <div {...getTableProps()} className={`table sticky ${type}`}>
         <div className="thead">
-          {fixedHeaderGroups.map((headerGroup) => {
+          {headerGroups.map((headerGroup) => {
             const {key, ...props} = headerGroup.getHeaderGroupProps();
             return (
               <div key={key} {...props} className="tr">
@@ -101,7 +101,7 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
           })}
         </div>
         <div {...getTableBodyProps()} className="tbody">
-          {rows.map((row) => {
+          {rows.map((row) => {     
             prepareRow(row);
             const {key: rowKey, ...rowProps} = row.getRowProps();
             return (
