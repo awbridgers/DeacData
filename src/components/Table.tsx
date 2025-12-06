@@ -1,12 +1,14 @@
-import {useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {Lineup} from '../lineupClass';
-import {total, net, advanced, shooting, csvHeaders} from '../util/tableSetup';
 import {
-  Column,
-  useTable,
-  useSortBy,
-  useFlexLayout,
-} from 'react-table';
+  total,
+  advanced,
+  shooting,
+  net,
+  csvHeaders,
+  headerList,
+} from '../util/tableSetup';
+import {Column, useTable, useSortBy, useFlexLayout} from 'react-table';
 import {CSVLink} from 'react-csv';
 import {TableStyle} from '../styles/table';
 import {useMediaQuery} from 'react-responsive';
@@ -28,21 +30,17 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     [data, count, filter]
   );
   const isMobile = useMediaQuery({maxWidth: '767px'});
-
   const tableColumns = useMemo<Column<Lineup>[]>(() => {
-    switch (type) {
-      case 'total':
-        return total(isMobile);
-      case 'net':
-        return net(isMobile);
-      case 'advanced':
-        return advanced(isMobile);
-      case 'shooting':
-        return shooting(isMobile);
-      default:
-        return total(isMobile);
-    }
-  }, [type, isMobile]);
+    return [
+      ...total(isMobile),
+      ...advanced(isMobile),
+      ...net(isMobile),
+      ...shooting(isMobile),
+    ];
+  }, [isMobile]);
+  const hiddenCols = useMemo(() => {
+    return headerList.filter((x) => !x.includes(type));
+  }, [type]);
   const defaultColumn = useMemo(
     () => ({
       // When using the useFlexLayout:
@@ -59,12 +57,23 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     rows,
     prepareRow,
     footerGroups,
+    setHiddenColumns,
   } = useTable(
-    {columns: tableColumns, data: tableData, defaultColumn, autoResetExpanded: false, autoResetSortBy: false },
+    {
+      columns: tableColumns,
+      data: tableData,
+      defaultColumn,
+      initialState: {
+        hiddenColumns: hiddenCols,
+      },
+    },
     useSortBy,
     useFlexLayout,
     useSticky
   );
+  useEffect(() => {
+    setHiddenColumns(hiddenCols);
+  }, [type]);
   return (
     <TableStyle>
       <div {...getTableProps()} className={`table sticky ${type}`}>
@@ -104,7 +113,7 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
           })}
         </div>
         <div {...getTableBodyProps()} className="tbody">
-          {rows.map((row) => {     
+          {rows.map((row) => {
             prepareRow(row);
             const {key: rowKey, ...rowProps} = row.getRowProps();
             return (
