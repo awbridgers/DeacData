@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {Lineup} from '../lineupClass';
 import {
   total,
@@ -71,14 +71,15 @@ const Table = ({data, type, onClick, filter, count}: iProps) => {
     useFlexLayout,
     useSticky
   );
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHiddenColumns(hiddenCols);
-  }, [type]);
+  }, [hiddenCols, setHiddenColumns]);
+  const headerGroupsFixed = type === 'advanced' || type === 'net' ? [headerGroups[1]] : headerGroups
   return (
     <TableStyle>
       <div {...getTableProps()} className={`table sticky ${type}`}>
         <div className="thead">
-          {headerGroups.map((headerGroup) => {
+          {headerGroupsFixed.map((headerGroup) => {
             const {key, ...props} = headerGroup.getHeaderGroupProps();
             return (
               <div key={key} {...props} className="tr">
